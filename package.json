@@ -1,0 +1,13 @@
+{
+  "name": "audioanalyzer",
+  "version": "1.0.0",
+  "description": "App para analizar audios y verificar cumplimiento de script usando OpenAI.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "openai": "^4.20.0",
+    "dotenv": "^16.3.1"
+  }
+} 
