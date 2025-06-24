@@ -4,6 +4,7 @@ const chokidar = require('chokidar');
 const { getCampaigns, getChecklist, getAudios, getAudioPath } = require('./src/campaignManager');
 const { transcribeAudio, analyzeWithGPT } = require('./src/openaiService');
 const { saveResult, moveAudioToProcessed, handleFailedAudio } = require('./src/resultWriter');
+const fs = require('fs');
 
 async function processAudioFile(campaignName, file, checklist) {
   const filePath = getAudioPath(campaignName, file);
@@ -59,8 +60,14 @@ async function runOnce(campaignArg) {
 }
 
 function runWatcher() {
-    console.log('Modo de vigilancia activado. Esperando nuevos audios en campaigns/*/audios/ ...');
-    const watcher = chokidar.watch('campaigns/*/audios', {
+    const campaignsDir = path.join(__dirname, 'campaigns');
+    if (!fs.existsSync(campaignsDir)) {
+        console.log("La carpeta 'campaigns' no existe. Creándola...");
+        fs.mkdirSync(campaignsDir);
+    }
+
+    console.log('Modo de vigilancia activado. Esperando nuevos audios en campaigns/[campaign]/audios/ ...');
+    const watcher = chokidar.watch(campaignsDir, {
         ignored: /(^|[\/\\])\../,
         persistent: true,
         ignoreInitial: true,
@@ -72,10 +79,14 @@ function runWatcher() {
 
     watcher.on('add', async (filePath) => {
         const absolutePath = path.resolve(filePath);
-        const relativePath = path.relative(path.join(__dirname, 'campaigns'), absolutePath);
+        const relativePath = path.relative(campaignsDir, absolutePath);
         const parts = relativePath.split(path.sep);
 
-        if (parts.length < 3 || parts[1] !== 'audios') return;
+        // Reaccionar solo a archivos dentro de una carpeta `audios`
+        // Ej: [campaignName, 'audios', 'fileName.mp3']
+        if (parts.length !== 3 || parts[1] !== 'audios') {
+            return;
+        }
 
         const campaignName = parts[0];
         const file = parts[2];
