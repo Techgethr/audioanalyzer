@@ -4,92 +4,89 @@ App en Node.js para analizar audios de campañas de call center y verificar si c
 
 ## Características
 - Soporte para múltiples campañas, cada una con su propio checklist y audios.
+- **Dos modos de ejecución**: única (procesa y termina) o continua (vigila nuevos audios).
 - Transcribe audios usando la API de OpenAI Whisper.
-- Analiza la transcripción con GPT para verificar intenciones (no frases exactas).
-- Muestra resultados en consola y los guarda en archivos de texto junto a los audios procesados.
+- Analiza la transcripción con GPT para verificar intenciones.
+- **Recuperación ante fallos**: Mueve los audios problemáticos a una carpeta `failed` para revisión manual, sin detener el proceso.
 - Estructura modular y escalable.
 
 ## Estructura del Proyecto
 
 ```
 audioanalyzer/
-├── index.js                # Punto de entrada
+├── index.js
 ├── src/
-│   ├── campaignManager.js  # Manejo de campañas y checklist
-│   ├── openaiService.js    # Interacción con OpenAI (Whisper y GPT)
-│   └── resultWriter.js     # Guardado de resultados y movimiento de archivos
+│   ├── campaignManager.js
+│   ├── openaiService.js
+│   └── resultWriter.js
 ├── package.json
 ├── .env
-├── .gitignore
 ├── README.md
 ├── campaigns/
-│   └── campaign1/
-│       ├── checklist.txt   # Requisitos/intenciones a verificar (uno por línea)
+│   └── [nombre_campaña]/
+│       ├── checklist.txt
 │       └── audios/
-│           └── llamada1.mp3
 └── processed/
-    └── campaign1/
-        ├── llamada1.mp3
-        └── llamada1.txt    # Resultado del análisis
+    └── [nombre_campaña]/
+        ├── [audio_procesado]
+        ├── [resultado.txt]
+        └── failed/
+            ├── [audio_fallido]
+            └── [error.log]
 ```
 
 - **src/**: Lógica del sistema, modularizada.
-- **campaigns/**: Carpeta donde se crean subcarpetas para cada campaña.
-  - Cada campaña debe tener su propio `checklist.txt` (una intención por línea) y una subcarpeta `audios/` con los archivos de audio a analizar.
-- **processed/**: Aquí se guardan los audios procesados y los archivos de resultados por campaña.
+- **campaigns/**: Contiene las carpetas de cada campaña, con su `checklist.txt` y carpeta `audios/`.
+- **processed/**: Guarda los audios procesados y sus resultados. Incluye una subcarpeta `failed/` para los audios que no se pudieron procesar.
 
 ## Configuración
 
-1. **Clona el repositorio y entra a la carpeta:**
+1. **Clona el repositorio e instala dependencias:**
    ```bash
    git clone <repo-url>
    cd audioanalyzer
-   ```
-
-2. **Instala las dependencias:**
-   ```bash
    npm install
    ```
 
-3. **Configura tu clave de OpenAI:**
+2. **Configura tu clave de OpenAI:**
    - Crea un archivo `.env` con el siguiente contenido:
      ```
      OPENAI_API_KEY=tu_api_key_aqui
-     OPENAI_MODEL_AUDIO=whisper-1 (u otro modelo)
-     OPENAI_MODEL_TEXT=gpt-3.5-turbo (u otro modelo)
+     OPENAI_MODEL_AUDIO=whisper-1
+     OPENAI_MODEL_TEXT=gpt-3.5-turbo
      ```
 
-4. **Crea campañas:**
-   - Dentro de la carpeta `campaigns/`, crea una subcarpeta para cada campaña (ej: `campaign1`).
-   - Dentro de cada campaña, agrega un archivo `checklist.txt` (una intención por línea, por ejemplo: "Saludo inicial", "Solicitud de número de cliente", etc.) y una subcarpeta `audios/` con los archivos de audio (`.mp3`, `.wav`, `.m4a`, `.mp4`).
+## Modos de Uso
 
-   Ejemplo:
-   ```
-   campaigns/
-     campaign1/
-       checklist.txt
-       audios/
-         llamada1.mp3
-         llamada2.wav
-     campaign2/
-       checklist.txt
-       audios/
-         llamada3.mp3
-   ```
+Existen dos modos para ejecutar la aplicación.
 
-## Uso
+### 1. Ejecución Única
+Procesa todos los audios pendientes una sola vez y luego termina.
 
-### Procesar todas las campañas
-```bash
-npm start
-```
+- **Procesar todas las campañas:**
+  ```bash
+  npm start
+  ```
+- **Procesar solo una campaña específica:**
+  ```bash
+  npm start [nombre_de_la_campaña]
+  ```
 
-### Procesar solo una campaña específica
-```bash
-npm start campaign1
-```
+### 2. Modo de Vigilancia Continua
+El script se queda activo y procesa automáticamente cualquier nuevo audio que se añada a las carpetas `campaigns/*/audios/`.
 
-- Los resultados se mostrarán en consola y se guardarán en la carpeta `processed/<campaign>/` como archivos `.txt` con el mismo nombre que el audio.
+- **Activar el modo de vigilancia:**
+  ```bash
+  npm start -- --watch
+  ```
+  *(El `--` es importante para pasar el flag al script a través de npm).*
+
+## Manejo de Errores
+Si un audio no se puede procesar (por un error de red, de la API, etc.), el sistema es robusto:
+- El audio problemático se mueve a `processed/[nombre_campaña]/failed/`.
+- Se crea un archivo `.log` junto al audio con los detalles del error.
+- El script continúa procesando los demás audios sin interrupción.
+Esto permite una re-ejecución segura en cualquier momento para procesar los audios que quedaron pendientes.
 
 ## Ejemplo de checklist.txt
 ```
@@ -98,12 +95,6 @@ Presentación de la empresa
 Solicitud de número de cliente
 Despedida cordial
 ```
-
-## Notas
-- El análisis es semántico: el checklist define intenciones, no frases exactas.
-- Los audios procesados se mueven automáticamente a la carpeta `processed/<campaign>/`.
-- Puedes agregar tantas campañas como necesites, cada una con su propio checklist y audios.
-- El sistema es modular y fácil de extender (puedes agregar más módulos en `src/` según tus necesidades).
 
 ## Requisitos
 - Node.js >= 16
