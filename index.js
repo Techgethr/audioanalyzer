@@ -59,15 +59,29 @@ async function runOnce(campaignArg) {
   console.log("\n--- Todas las campañas han sido procesadas ---");
 }
 
-function runWatcher() {
-    const campaignsDir = path.join(__dirname, 'campaigns');
-    if (!fs.existsSync(campaignsDir)) {
-        console.log("La carpeta 'campaigns' no existe. Creándola...");
-        fs.mkdirSync(campaignsDir);
+function runWatcher(campaignArg) {
+    let watchPath;
+    if (campaignArg) {
+        // Vigilar solo una campaña específica
+        const audiosDir = path.join(__dirname, 'campaigns', campaignArg, 'audios');
+        if (!fs.existsSync(audiosDir)) {
+            console.log(`La carpeta '${audiosDir}' no existe. Creándola...`);
+            fs.mkdirSync(audiosDir, { recursive: true });
+        }
+        watchPath = audiosDir;
+        console.log(`Modo de vigilancia activado SOLO para la campaña '${campaignArg}'. Esperando nuevos audios en ${watchPath} ...`);
+    } else {
+        // Vigilar todas las campañas
+        const campaignsDir = path.join(__dirname, 'campaigns');
+        if (!fs.existsSync(campaignsDir)) {
+            console.log("La carpeta 'campaigns' no existe. Creándola...");
+            fs.mkdirSync(campaignsDir);
+        }
+        watchPath = campaignsDir;
+        console.log('Modo de vigilancia activado. Esperando nuevos audios en campaigns/[campaign]/audios/ ...');
     }
 
-    console.log('Modo de vigilancia activado. Esperando nuevos audios en campaigns/[campaign]/audios/ ...');
-    const watcher = chokidar.watch(campaignsDir, {
+    const watcher = chokidar.watch(watchPath, {
         ignored: /(^|[\/\\])\../,
         persistent: true,
         ignoreInitial: true,
@@ -79,20 +93,23 @@ function runWatcher() {
 
     watcher.on('add', async (filePath) => {
         const absolutePath = path.resolve(filePath);
-        const relativePath = path.relative(campaignsDir, absolutePath);
-        const parts = relativePath.split(path.sep);
-
-        // Reaccionar solo a archivos dentro de una carpeta `audios`
-        // Ej: [campaignName, 'audios', 'fileName.mp3']
-        if (parts.length !== 3 || parts[1] !== 'audios') {
-            return;
+        let campaignName, file;
+        if (campaignArg) {
+            // Solo una campaña
+            campaignName = campaignArg;
+            file = path.basename(filePath);
+        } else {
+            // Todas las campañas
+            const campaignsDir = path.join(__dirname, 'campaigns');
+            const relativePath = path.relative(campaignsDir, absolutePath);
+            const parts = relativePath.split(path.sep);
+            if (parts.length !== 3 || parts[1] !== 'audios') {
+                return;
+            }
+            campaignName = parts[0];
+            file = parts[2];
         }
-
-        const campaignName = parts[0];
-        const file = parts[2];
-        
         console.log(`\n-> Nuevo audio detectado: ${file} en campaña ${campaignName}`);
-        
         try {
             const checklist = getChecklist(campaignName);
             await processAudioFile(campaignName, file, checklist);
@@ -111,7 +128,7 @@ function main() {
   const campaignArg = args.find(arg => !arg.startsWith('--'));
 
   if (watchMode) {
-    runWatcher();
+    runWatcher(campaignArg);
   } else {
     runOnce(campaignArg);
   }
