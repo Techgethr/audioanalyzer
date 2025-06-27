@@ -5,6 +5,8 @@ const { getCampaigns, getChecklist, getAudios, getAudioPath } = require('./src/c
 const { transcribeAudio, analyzeWithGPT } = require('./src/openaiService');
 const { saveResult, moveAudioToProcessed, handleFailedAudio } = require('./src/resultWriter');
 const fs = require('fs');
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
 
 async function processAudioFile(campaignName, file, checklist) {
   const filePath = getAudioPath(campaignName, file);
@@ -133,5 +135,110 @@ function main() {
     runOnce(campaignArg);
   }
 }
+
+// Handler para AWS Lambda
+exports.handler = async (event) => {
+  // Asume que el evento es de tipo S3 Put
+  const record = event.Records && event.Records[0];
+  if (!record) {
+    console.error('No S3 record found in event');
+    return { statusCode: 400, body: 'No S3 record found' };
+  }
+
+  const bucket = record.s3.bucket.name;
+  const key = decodeURIComponent(record.s3.object.key.replace(/\+/g, ' '));
+
+  // Se espera que la estructura sea campaigns/[campaign]/audios/[file]
+  const parts = key.split('/');
+  if (parts.length !== 4 || parts[0] !== 'campaigns' || parts[2] !== 'audios') {
+    console.error('S3 object key does not match expected structure: campaigns/[campaign]/audios/[file]');
+    return { statusCode: 400, body: 'Invalid S3 object key structure' };
+  }
+  const campaignName = parts[1];
+  const file = parts[3];
+
+  // Descargar el archivo de S3 a /tmp (Lambda)
+  const tmpFilePath = `/tmp/${file}`;
+  try {
+    const s3Object = await s3.getObject({ Bucket: bucket, Key: key }).promise();
+    const fs = require('fs');
+    fs.writeFileSync(tmpFilePath, s3Object.Body);
+  } catch (err) {
+    console.error('Error downloading file from S3:', err);
+    return { statusCode: 500, body: 'Error downloading file from S3' };
+  }
+
+  // Obtener checklist
+  let checklist;
+  try {
+    // Descargar checklist.txt de S3
+    const checklistKey = `campaigns/${campaignName}/checklist.txt`;
+    const checklistObj = await s3.getObject({ Bucket: bucket, Key: checklistKey }).promise();
+    checklist = checklistObj.Body.toString('utf-8').split('\n').map(l => l.trim()).filter(Boolean);
+  } catch (err) {
+    console.error('Error downloading checklist.txt from S3:', err);
+    return { statusCode: 500, body: 'Error downloading checklist.txt from S3' };
+  }
+
+  // Procesar el archivo de audio
+  try {
+    const transcription = await transcribeAudio(tmpFilePath);
+    const gptResult = await analyzeWithGPT(transcription, checklist);
+
+    // Guardar resultado en S3 (en processed/)
+    const resultText = [
+      `Archivo: ${file}`,
+      `Campaña: ${campaignName}`,
+      '',
+      'Transcripción:',
+      transcription,
+      '',
+      'Checklist:',
+      ...checklist.map((c, i) => `${i+1}. ${c}`),
+      '',
+      'Resultado del análisis GPT:',
+      gptResult,
+      ''
+    ].join('\n');
+    const resultKey = `processed/${campaignName}/${file.replace(/\.[^/.]+$/, '.txt')}`;
+    await s3.putObject({
+      Bucket: bucket,
+      Key: resultKey,
+      Body: resultText,
+      ContentType: 'text/plain'
+    }).promise();
+
+    // Mover el audio procesado a processed/
+    const processedAudioKey = `processed/${campaignName}/${file}`;
+    await s3.copyObject({
+      Bucket: bucket,
+      CopySource: `${bucket}/${key}`,
+      Key: processedAudioKey
+    }).promise();
+    await s3.deleteObject({ Bucket: bucket, Key: key }).promise();
+
+    return { statusCode: 200, body: 'Audio procesado correctamente' };
+  } catch (err) {
+    console.error('Error procesando audio:', err);
+    // Guardar log de error en S3
+    const failedKey = `processed/${campaignName}/failed/${file.replace(/\.[^/.]+$/, '.log')}`;
+    const errorText = `Failed to process ${file} for campaign ${campaignName}.\nError: ${err.stack || err.message}\nTimestamp: ${new Date().toISOString()}`;
+    await s3.putObject({
+      Bucket: bucket,
+      Key: failedKey,
+      Body: errorText,
+      ContentType: 'text/plain'
+    }).promise();
+    // Mover el audio a failed
+    const failedAudioKey = `processed/${campaignName}/failed/${file}`;
+    await s3.copyObject({
+      Bucket: bucket,
+      CopySource: `${bucket}/${key}`,
+      Key: failedAudioKey
+    }).promise();
+    await s3.deleteObject({ Bucket: bucket, Key: key }).promise();
+    return { statusCode: 500, body: 'Error procesando audio' };
+  }
+};
 
 main(); 

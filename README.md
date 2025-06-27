@@ -99,3 +99,26 @@ Despedida cordial
 ## Requisitos
 - Node.js >= 16
 - Cuenta y API Key de OpenAI con acceso a Whisper y GPT
+
+## Uso como AWS Lambda con S3
+
+Ahora este proyecto puede ejecutarse como función Lambda, procesando automáticamente archivos de audio subidos a un bucket S3.
+
+### Estructura esperada en S3
+- Los audios deben subirse a: `campaigns/[nombre_campaña]/audios/[archivo]`
+- El checklist debe estar en: `campaigns/[nombre_campaña]/checklist.txt`
+- Los resultados y archivos procesados se guardarán en: `processed/[nombre_campaña]/`
+
+### Pasos para desplegar:
+1. Empaqueta el código (incluyendo `node_modules`) en un zip.
+2. Sube el zip como función Lambda.
+3. Configura la variable de entorno `OPENAI_API_KEY` y los modelos si es necesario.
+4. Crea un trigger de tipo S3 para la función Lambda:
+   - Evento: `PUT`
+   - Prefijo: `campaigns/`
+   - Sufijo: (vacío o restringido a extensiones de audio)
+5. Asegúrate de que la Lambda tenga permisos para leer y escribir en el bucket S3.
+
+### Notas
+- El procesamiento y guardado de resultados ahora es completamente en S3 y `/tmp` (directorio temporal de Lambda).
+- El modo watcher y procesamiento local siguen disponibles para uso fuera de Lambda.
