@@ -20,7 +20,7 @@ App en Node.js para analizar audios de campañas de call center y verificar si c
 - Soporte para múltiples campañas, cada una con su propio checklist y audios.
 - **Dos modos de ejecución**: única (procesa y termina) o continua (vigila nuevos audios).
 - Transcribe audios usando la API de OpenAI Whisper.
-- Analiza la transcripción con GPT para verificar intenciones.
+- Analiza la transcripción con GPT p los audios directamente con Voxtral para verificar intenciones.
 - **Recuperación ante fallos**: Mueve los audios problemáticos a una carpeta `failed` para revisión manual, sin detener el proceso.
 - Estructura modular y escalable.
 
@@ -31,8 +31,11 @@ audioanalyzer/
 ├── index.js
 ├── src/
 │   ├── campaignManager.js
-│   ├── openaiService.js
-│   └── resultWriter.js
+│   ├── resultWriter.js
+│   └── services
+│       └── ai
+│           └── openai.js
+│           └── voxtral.js
 ├── package.json
 ├── .env
 ├── README.md
@@ -65,9 +68,15 @@ audioanalyzer/
 2. **Configura tu clave de OpenAI:**
    - Crea un archivo `.env` con el siguiente contenido:
      ```
+     AI_SERVICE=openai o voxtral
+
+     # Si usas OpenAI
      OPENAI_API_KEY=tu_api_key_aqui
      OPENAI_MODEL_AUDIO=whisper-1
      OPENAI_MODEL_TEXT=gpt-3.5-turbo
+
+     # Si usas Voxtral
+     MISTRAL_API_KEY=tu_mistral_api_key
      ```
 
 ## Modos de Uso
@@ -113,6 +122,7 @@ Despedida cordial
 ## Requisitos
 - Node.js >= 16
 - Cuenta y API Key de OpenAI con acceso a Whisper y GPT
+- O cuenta y API Key de Mistral para usar con el modelo Voxtral en lugar de OpenAI.
 
 ## Uso como AWS Lambda con S3
 
@@ -126,7 +136,7 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 ### Pasos para desplegar:
 1. Empaqueta el código (incluyendo `node_modules`) en un zip.
 2. Sube el zip como función Lambda.
-3. Configura la variable de entorno `OPENAI_API_KEY` y los modelos si es necesario.
+3. Configura las variables de entorno y los modelos si es necesario.
 4. Crea un trigger de tipo S3 para la función Lambda:
    - Evento: `PUT`
    - Prefijo: `campaigns/`
@@ -158,7 +168,7 @@ Node.js app to analyze call center campaign audios and check if they meet define
 - Support for multiple campaigns, each with its own checklist and audios.
 - **Two execution modes**: single run (processes and exits) or continuous (watches for new audios).
 - Transcribes audios using the OpenAI Whisper API.
-- Analyzes the transcription with GPT to verify intentions.
+- Analyzes the transcription with GPT or the audios with Voxtral directly to verify intentions.
 - **Failure recovery**: Moves problematic audios to a `failed` folder for manual review, without stopping the process.
 - Modular and scalable structure.
 
@@ -169,8 +179,11 @@ audioanalyzer/
 ├── index.js
 ├── src/
 │   ├── campaignManager.js
-│   ├── openaiService.js
-│   └── resultWriter.js
+│   ├── resultWriter.js
+│   └── services
+│       └── ai
+│           └── openai.js
+│           └── voxtral.js
 ├── package.json
 ├── .env
 ├── README.md
@@ -203,9 +216,14 @@ audioanalyzer/
 2. **Set up your OpenAI key:**
    - Create a `.env` file with the following content:
      ```
+     AI_SERVICE=openai o voxtral
+
      OPENAI_API_KEY=your_api_key_here
      OPENAI_MODEL_AUDIO=whisper-1
      OPENAI_MODEL_TEXT=gpt-3.5-turbo
+
+     # Si usas Voxtral
+     MISTRAL_API_KEY=tu_mistral_api_key
      ```
 
 ## Usage Modes
@@ -251,6 +269,7 @@ Polite farewell
 ## Requirements
 - Node.js >= 16
 - OpenAI account and API Key with access to Whisper and GPT
+- Or Mistral account and API Key to use Voxtral to analyze the audio instead of OpenAI.
 
 ## AWS Lambda Usage with S3
 
