@@ -78,6 +78,10 @@ audioanalyzer/
 
      # Si usas Voxtral
      MISTRAL_API_KEY=tu_mistral_api_key
+     MISTRAL_MODEL_AUDIO=voxtral_model
+     # Si quieres hacer transcripción previamente al análisis con Mistral, configura las siguientes variables
+     MISTRAL_INCLUDE_TRANSCRIPTION=true or false
+     MISTRAL_MODEL_TEXT=
      ```
 
 ## Modos de Uso
@@ -226,6 +230,10 @@ audioanalyzer/
 
      # IF Voxtral is used
      MISTRAL_API_KEY=tu_mistral_api_key
+     MISTRAL_MODEL_AUDIO=voxtral_model
+     # If you want to transcribe before analyzing with Mistral, configure the following variables
+     MISTRAL_INCLUDE_TRANSCRIPTION=true or false
+     MISTRAL_MODEL_TEXT=
      ```
 
 ## Usage Modes
