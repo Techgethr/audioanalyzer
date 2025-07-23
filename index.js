@@ -2,8 +2,7 @@ require('dotenv').config();
 const path = require('path');
 const chokidar = require('chokidar');
 const { getCampaigns, getChecklist, getAudios, getAudioPath } = require('./src/campaignManager');
-const { transcribeAudio, analyzeWithGPT } = require('./src/services/ai/openai');
-const { analyzeAudio } = require('./src/services/ai/voxtral');
+const { analyzeAudio } = require('./src/services/ai/index');
 const { saveResult, moveAudioToProcessed, handleFailedAudio } = require('./src/resultWriter');
 const fs = require('fs');
 const AWS = require('aws-sdk');
@@ -14,28 +13,11 @@ async function processAudioFile(campaignName, file, checklist) {
   const filePath = getAudioPath(campaignName, file);
   console.log(`\n-> Procesando: ${file}`);
   try {
-    if (process.env.AI_SERVICE === 'voxtral') {
-      const gptResult = await analyzeAudio(filePath, checklist);
-      console.log('   Análisis Voxtral: OK');
-      saveResult(campaignName, file, null, checklist, gptResult);
-      moveAudioToProcessed(campaignName, file, filePath);
-      console.log(`   ÉXITO: ${file} procesado correctamente.`);
-    }
-    if (process.env.AI_SERVICE === 'openai') {
-      const transcription = await transcribeAudio(filePath);
-      console.log('   Transcripción: OK');
-        
-      const gptResult = await analyzeWithGPT(transcription, checklist);
-      console.log('   Análisis GPT: OK');
-        
-      saveResult(campaignName, file, transcription, checklist, gptResult);
-      moveAudioToProcessed(campaignName, file, filePath);
-        
-      console.log(`   ÉXITO: ${file} procesado correctamente.`);
-    }
+    const gptResult = await analyzeAudio(filePath, checklist);
+    saveResult(campaignName, file, gptResult.transcription, checklist, gptResult.results);
+    moveAudioToProcessed(campaignName, file, filePath);
+    console.log(`   ÉXITO: ${file} procesado correctamente.`);
     
-    
-
   } catch (err) {
     console.error(`   ERROR al procesar ${file}: ${err.message}`);
     handleFailedAudio(campaignName, file, filePath, err);

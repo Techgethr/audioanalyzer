@@ -80,7 +80,7 @@ async function requestAnalysis(signedUrl, checklist) {
         'Content-Type': 'application/json',
       },
     });
-    return data.choices[0].message.content;
+    return {transcription : null, results: data.choices[0].message.content};
   } catch (error) {
     throw new Error(`Error en la solicitud de análisis: ${error.message}`);
   }
@@ -89,7 +89,7 @@ async function requestAnalysis(signedUrl, checklist) {
 /**
  * 🚀 Flujo completo de análisis de audio
  */
-async function analyzeAudio(filePath, checklist) {
+async function analyzeDirectFromAudio(filePath, checklist) {
   try {
     const fileId = await uploadAudio(filePath);
     const signedUrl = await getSignedUrl(fileId);
@@ -102,5 +102,5 @@ async function analyzeAudio(filePath, checklist) {
 }
 
 module.exports = {
-  analyzeAudio,
+  analyzeDirectFromAudio,
 };

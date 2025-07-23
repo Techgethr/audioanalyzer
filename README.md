@@ -34,6 +34,7 @@ audioanalyzer/
 │   ├── resultWriter.js
 │   └── services
 │       └── ai
+│           └── index.js
 │           └── openai.js
 │           └── voxtral.js
 ├── package.json
@@ -65,7 +66,7 @@ audioanalyzer/
    npm install
    ```
 
-2. **Configura tu clave de OpenAI:**
+2. **Configura tus claves:**
    - Crea un archivo `.env` con el siguiente contenido:
      ```
      AI_SERVICE=openai o voxtral
@@ -182,6 +183,7 @@ audioanalyzer/
 │   ├── resultWriter.js
 │   └── services
 │       └── ai
+│           └── index.js
 │           └── openai.js
 │           └── voxtral.js
 ├── package.json
@@ -213,16 +215,16 @@ audioanalyzer/
    npm install
    ```
 
-2. **Set up your OpenAI key:**
+2. **Set up your keys:**
    - Create a `.env` file with the following content:
      ```
-     AI_SERVICE=openai o voxtral
+     AI_SERVICE=openai or voxtral
 
      OPENAI_API_KEY=your_api_key_here
      OPENAI_MODEL_AUDIO=whisper-1
      OPENAI_MODEL_TEXT=gpt-3.5-turbo
 
-     # Si usas Voxtral
+     # IF Voxtral is used
      MISTRAL_API_KEY=tu_mistral_api_key
      ```
 

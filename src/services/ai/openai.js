@@ -20,7 +20,16 @@ async function transcribeAudio(filePath) {
   return resp;
 }
 
-async function analyzeWithGPT(transcription, checklist) {
+async function analyzewithGPT(filePath, checklist) {
+
+  if (!filePath || !fs.existsSync(filePath)) {
+    throw new Error('Invalid file path provided for audio analysis.');
+  }
+  if (!Array.isArray(checklist) || checklist.length === 0) {
+    throw new Error('Checklist must be a non-empty array.');
+  }
+  const transcription = await transcribeAudio(filePath);
+
   const prompt = `Dada la siguiente transcripción de una llamada, responde SÍ o NO para cada uno de los siguientes puntos, y justifica brevemente tu respuesta:\n\nChecklist:\n${checklist.map((c, i) => `${i+1}. ${c}`).join('\n')}\n\nTranscripción:\n${transcription}\n\nResponde en el formato:\n1. SÍ/NO - Justificación\n2. SÍ/NO - Justificación\n...`;
   
   const completion = await openai.chat.completions.create({
@@ -36,10 +45,9 @@ async function analyzeWithGPT(transcription, checklist) {
     throw new Error('Received empty response from GPT.');
   }
   
-  return completion.choices[0].message.content.trim();
+  return {transcription : transcription, results: completion.choices[0].message.content.trim()};
 }
 
 module.exports = {
-  transcribeAudio,
-  analyzeWithGPT
+  analyzewithGPT
 }; 
