@@ -2,19 +2,19 @@ require('dotenv').config();
 const { analyzewithGPT } = require('./openai');
 const { analyzeDirectFromAudio, analyzeWithTranscription } = require('./voxtral');
 
-async function analyzeAudio(filePath, checklist) {
+async function analyzeAudio(filePath, checklist, language) {
     if (process.env.AI_SERVICE == 'voxtral') {
         if(process.env.MISTRAL_INCLUDE_TRANSCRIPTION === 'true') {
-            const gptResult = await analyzeWithTranscription(filePath, checklist);
+            const gptResult = await analyzeWithTranscription(filePath, checklist, language);
             console.log('   Análisis Voxtral: OK');
             return gptResult;
         }
-        const gptResult = await analyzeDirectFromAudio(filePath, checklist);
+        const gptResult = await analyzeDirectFromAudio(filePath, checklist, language);
         console.log('   Análisis Voxtral: OK');
         return gptResult;
     }
     if (process.env.AI_SERVICE == 'openai') {
-        const gptResult = await analyzewithGPT(filePath, checklist);
+        const gptResult = await analyzewithGPT(filePath, checklist, language);
         console.log('   Análisis GPT: OK');
         return gptResult;
     }

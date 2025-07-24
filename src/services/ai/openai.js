@@ -1,6 +1,7 @@
 require('dotenv').config();
 const fs = require('fs');
 const { OpenAI } = require('openai');
+const {getInstructions} = require("../../promptManager")
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
@@ -20,7 +21,7 @@ async function transcribeAudio(filePath) {
   return resp;
 }
 
-async function analyzewithGPT(filePath, checklist) {
+async function analyzewithGPT(filePath, checklist, language) {
 
   if (!filePath || !fs.existsSync(filePath)) {
     throw new Error('Invalid file path provided for audio analysis.');
@@ -30,13 +31,13 @@ async function analyzewithGPT(filePath, checklist) {
   }
   const transcription = await transcribeAudio(filePath);
 
-  const prompt = `Dada la siguiente transcripción de una llamada, responde SÍ o NO para cada uno de los siguientes puntos, y justifica brevemente tu respuesta:\n\nChecklist:\n${checklist.map((c, i) => `${i+1}. ${c}`).join('\n')}\n\nTranscripción:\n${transcription}\n\nResponde en el formato:\n1. SÍ/NO - Justificación\n2. SÍ/NO - Justificación\n...`;
-  
+  const instructions = getInstructions(language,checklist,transcription);
+
   const completion = await openai.chat.completions.create({
     model: TEXT_MODEL,
     messages: [
-      { role: 'system', content: 'Eres un asistente que evalúa llamadas de call center.' },
-      { role: 'user', content: prompt }
+      { role: 'system', content: instructions.systemMessage },
+      { role: 'user', content: instructions.prompt }
     ],
     temperature: 0.2
   });

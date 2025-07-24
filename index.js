@@ -9,11 +9,11 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 
 
-async function processAudioFile(campaignName, file, checklist) {
+async function processAudioFile(campaignName, file, checklist, language) {
   const filePath = getAudioPath(campaignName, file);
   console.log(`\n-> Procesando: ${file}`);
   try {
-    const gptResult = await analyzeAudio(filePath, checklist);
+    const gptResult = await analyzeAudio(filePath, checklist, language);
     saveResult(campaignName, file, gptResult.transcription, checklist, gptResult.results);
     moveAudioToProcessed(campaignName, file, filePath);
     console.log(`   ÉXITO: ${file} procesado correctamente.`);
@@ -34,9 +34,13 @@ async function runOnce(campaignArg) {
 
   for (const campaignName of campaignsToProcess) {
     console.log(`\n--- Iniciando campaña: ${campaignName} ---`);
+    
     let checklist;
+    let language;
     try {
-      checklist = getChecklist(campaignName);
+      const fullCheckList = getChecklist(campaignName);
+      language = fullCheckList.language;
+      checklist = fullCheckList.checklist;
     } catch (err) {
       console.error(`Error al iniciar campaña ${campaignName}: ${err.message}`);
       continue;
@@ -50,7 +54,7 @@ async function runOnce(campaignArg) {
 
     console.log(`Se procesarán ${audios.length} audios.`);
     for (const file of audios) {
-      await processAudioFile(campaignName, file, checklist);
+      await processAudioFile(campaignName, file, checklist, language);
     }
   }
   console.log("\n--- Todas las campañas han sido procesadas ---");
@@ -108,8 +112,10 @@ function runWatcher(campaignArg) {
         }
         console.log(`\n-> Nuevo audio detectado: ${file} en campaña ${campaignName}`);
         try {
-            const checklist = getChecklist(campaignName);
-            await processAudioFile(campaignName, file, checklist);
+            const fullCheckList = getChecklist(campaignName);
+            const checklist = fullCheckList.checklist;
+            const language = fullCheckList.language;
+            await processAudioFile(campaignName, file, checklist,language);
         } catch(err) {
             console.error(`Error al procesar nuevo audio en modo vigilancia: ${err.message}`);
             handleFailedAudio(campaignName, file, absolutePath, err);

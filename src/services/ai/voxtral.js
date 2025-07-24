@@ -1,10 +1,11 @@
 const axios = require('axios');
 const fs = require('fs');
-const path = require('path');
 const FormData = require('form-data');
+const {getInstructions} = require("../../promptManager")
 require('dotenv').config();
 
 const MISTRAL_API_KEY = process.env.MISTRAL_API_KEY;
+const MISTRAL_ENDPOINT = process.env.MISTRAL_ENDPOINT;
 const MISTRAL_MODEL_AUDIO = process.env.MISTRAL_MODEL_AUDIO || 'voxtral-mini-latest';
 const MISTRAL_MODEL_TEXT = process.env.MISTRAL_MODEL_TEXT || 'mistral-small-2506';
 
@@ -17,7 +18,7 @@ async function uploadAudio(filePath) {
   form.append('file', fs.createReadStream(filePath));
 
   try {
-    const { data } = await axios.post('https://api.mistral.ai/v1/files', form, {
+    const { data } = await axios.post(`${MISTRAL_ENDPOINT}/files`, form, {
       headers: {
         Authorization: `Bearer ${MISTRAL_API_KEY}`,
         ...form.getHeaders(),
@@ -33,7 +34,7 @@ async function uploadAudio(filePath) {
  * 🔗 Obtiene la URL firmada del archivo subido
  */
 async function getSignedUrl(fileId) {
-  const url = `https://api.mistral.ai/v1/files/${fileId}/url?expiry=24`;
+  const url = `${MISTRAL_ENDPOINT}/files/${fileId}/url?expiry=24`;
 
   try {
     const { data } = await axios.get(url, {
@@ -51,8 +52,9 @@ async function getSignedUrl(fileId) {
 /**
  * 🧠 Envía el audio + checklist al modelo Voxtral
  */
-async function requestAnalysis(signedUrl, checklist) {
-    const prompt = `Dado este audio de una llamada, responde SÍ o NO para cada uno de los siguientes puntos que deberían estar presentes en el audio, si están, es SÍ, de lo contrario es NO, y justifica brevemente tu respuesta:\n\nChecklist:\n${checklist.map((c, i) => `${i+1}. ${c}`).join('\n')}\n\nResponde en el formato:\n1. SÍ/NO - Justificación\n2. SÍ/NO - Justificación\n...`;
+async function requestAnalysis(signedUrl, checklist, language) {
+
+    const instructions = getInstructions(language,checklist,null);
     const payload = {
         model: MISTRAL_MODEL_AUDIO,
         messages: [
@@ -68,7 +70,7 @@ async function requestAnalysis(signedUrl, checklist) {
             },
             {
                 type: 'text',
-                text: prompt,
+                text: instructions.prompt,
             },
             ],
         },
@@ -76,7 +78,7 @@ async function requestAnalysis(signedUrl, checklist) {
     };
   
   try {
-    const { data } = await axios.post('https://api.mistral.ai/v1/chat/completions', payload, {
+    const { data } = await axios.post(`${MISTRAL_ENDPOINT}/chat/completions`, payload, {
       headers: {
         Authorization: `Bearer ${MISTRAL_API_KEY}`,
         'Content-Type': 'application/json',
@@ -98,7 +100,7 @@ async function transcribeAudio(filePath) {
   form.append('file_url', signedUrl);
   form.append('model', MISTRAL_MODEL_AUDIO);
   try {
-    const { data } = await axios.post('https://api.mistral.ai/v1/audio/transcriptions', form, {
+    const { data } = await axios.post(`${MISTRAL_ENDPOINT}/audio/transcriptions`, form, {
       headers: {
         ...form.getHeaders(),
         Authorization: `Bearer ${MISTRAL_API_KEY}`,
@@ -111,7 +113,7 @@ async function transcribeAudio(filePath) {
   }
 }
 
-async function analyzeWithTranscription(filePath, checklist) {
+async function analyzeWithTranscription(filePath, checklist, language) {
   if (!filePath || !fs.existsSync(filePath)) {
     throw new Error('Invalid file path provided for audio analysis.');
   }
@@ -120,18 +122,17 @@ async function analyzeWithTranscription(filePath, checklist) {
   }
 
   const transcription = await transcribeAudio(filePath);
-
-  const prompt = `Dada la siguiente transcripción de una llamada, responde SÍ o NO para cada uno de los siguientes puntos, y justifica brevemente tu respuesta:\n\nChecklist:\n${checklist.map((c, i) => `${i+1}. ${c}`).join('\n')}\n\nTranscripción:\n${transcription}\n\nResponde en el formato:\n1. SÍ/NO - Justificación\n2. SÍ/NO - Justificación\n...`;
+  const instructions = getInstructions(language,checklist,transcription);
 
   const payload = {
     model: MISTRAL_MODEL_TEXT,
     messages: [
-      { role: 'system', content: 'Eres un asistente que evalúa llamadas de call center.' },
-      { role: 'user', content: prompt }
+      { role: 'system', content: instructions.systemMessage },
+      { role: 'user', content: instructions.prompt }
     ],
   };
   try {
-    const {data} = await axios.post('https://api.mistral.ai/v1/chat/completions', payload, {
+    const {data} = await axios.post(`${MISTRAL_ENDPOINT}/chat/completions`, payload, {
       headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
@@ -148,11 +149,11 @@ async function analyzeWithTranscription(filePath, checklist) {
 /**
  * 🚀 Flujo completo de análisis de audio
  */
-async function analyzeDirectFromAudio(filePath, checklist) {
+async function analyzeDirectFromAudio(filePath, checklist, language) {
   try {
     const fileId = await uploadAudio(filePath);
     const signedUrl = await getSignedUrl(fileId);
-    const analysis = await requestAnalysis(signedUrl, checklist);
+    const analysis = await requestAnalysis(signedUrl, checklist, language);
     return analysis;
   } catch (error) {
     console.error('❌ Error en el flujo:', error.message);

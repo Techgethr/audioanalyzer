@@ -31,6 +31,7 @@ audioanalyzer/
 ├── index.js
 ├── src/
 │   ├── campaignManager.js
+│   ├── promptManager.js
 │   ├── resultWriter.js
 │   └── services
 │       └── ai
@@ -79,6 +80,7 @@ audioanalyzer/
      # Si usas Voxtral
      MISTRAL_API_KEY=tu_mistral_api_key
      MISTRAL_MODEL_AUDIO=voxtral_model
+     MISTRAL_ENDPOINT=https://api.mistral.ai/v1
      # Si quieres hacer transcripción previamente al análisis con Mistral, configura las siguientes variables
      MISTRAL_INCLUDE_TRANSCRIPTION=true or false
      MISTRAL_MODEL_TEXT=
@@ -118,11 +120,14 @@ Esto permite una re-ejecución segura en cualquier momento para procesar los aud
 
 ## Ejemplo de checklist.txt
 ```
+es
 Saludo inicial
 Presentación de la empresa
 Solicitud de número de cliente
 Despedida cordial
 ```
+
+**La primera línea del checklist debe indicar el idioma para el análisis (es o en)**
 
 ## Requisitos
 - Node.js >= 16
@@ -184,6 +189,7 @@ audioanalyzer/
 ├── index.js
 ├── src/
 │   ├── campaignManager.js
+│   ├── promptManager.js
 │   ├── resultWriter.js
 │   └── services
 │       └── ai
@@ -231,6 +237,7 @@ audioanalyzer/
      # IF Voxtral is used
      MISTRAL_API_KEY=tu_mistral_api_key
      MISTRAL_MODEL_AUDIO=voxtral_model
+     MISTRAL_ENDPOINT=https://api.mistral.ai/v1
      # If you want to transcribe before analyzing with Mistral, configure the following variables
      MISTRAL_INCLUDE_TRANSCRIPTION=true or false
      MISTRAL_MODEL_TEXT=
@@ -270,11 +277,14 @@ This allows safe re-execution at any time to process pending audios.
 
 ## Example checklist.txt
 ```
+en
 Initial greeting
 Company introduction
 Request for customer number
 Polite farewell
 ```
+
+**The first line of the checklist should indicate the language for the analysis (es or en)**
 
 ## Requirements
 - Node.js >= 16

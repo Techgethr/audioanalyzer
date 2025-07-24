@@ -14,7 +14,15 @@ function getChecklist(campaignName) {
   if (!fs.existsSync(checklistPath)) {
     throw new Error(`No checklist.txt found for campaign ${campaignName}`);
   }
-  return fs.readFileSync(checklistPath, 'utf-8').split('\n').map(l => l.trim()).filter(Boolean);
+  const lines = fs.readFileSync(checklistPath, 'utf-8')
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean);
+
+  const language = lines[0]; // Primera línea como idioma
+  const checklist = lines.slice(1); // Resto como checklist
+
+  return { language, checklist };
 }
 
 function getAudios(campaignName) {

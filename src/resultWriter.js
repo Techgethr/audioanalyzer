@@ -16,16 +16,16 @@ function saveResult(campaignName, file, transcription, checklist, gptResult) {
   const txtFileName = file.replace(/\.[^/.]+$/, '.txt');
   const txtFilePath = path.join(dir, txtFileName);
   const resultText = [
-    `Archivo: ${file}`,
-    `Campaña: ${campaignName}`,
+    `File: ${file}`,
+    `Campaign: ${campaignName}`,
     '',
-    'Transcripción:',
+    'Transcription:',
     transcription,
     '',
     'Checklist:',
     ...checklist.map((c, i) => `${i+1}. ${c}`),
     '',
-    'Resultado del análisis GPT:',
+    'Results:',
     gptResult,
     ''
   ].join('\n');
