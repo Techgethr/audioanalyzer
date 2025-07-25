@@ -1,4 +1,4 @@
-# AudioAnalyzer
+# Audio Analyzer
 
 ## Índice
 - [Descripción](#descripción)
@@ -14,13 +14,13 @@
 
 # Descripción
 
-App en Node.js para analizar audios de campañas de call center y verificar si cumplen con requisitos definidos (intenciones), usando transcripción automática de OpenAI Whisper y análisis semántico con GPT.
+App en Node.js para analizar audios de conversaciones para distintas campañas (como soporte, ventas, etc.) y verificar si cumplen con requisitos definidos, como seguimiento de scripts, tono, y mucho más, usando análisis y servicios de AI. 
 
 ## Características
 - Soporte para múltiples campañas, cada una con su propio checklist y audios.
 - **Dos modos de ejecución**: única (procesa y termina) o continua (vigila nuevos audios).
-- Transcribe audios usando la API de OpenAI Whisper.
-- Analiza la transcripción con GPT p los audios directamente con Voxtral para verificar intenciones.
+- Transcribe audios usando distintos modelos (OpenAI con Whisper o Mistral con Voxtral)
+- Analiza audios de detalle y justificación (seguimiento de un script predefinido de conversación, análisis emocional y del tono, calidad del audio, y resumen de cumplimiento)
 - **Recuperación ante fallos**: Mueve los audios problemáticos a una carpeta `failed` para revisión manual, sin detener el proceso.
 - Estructura modular y escalable.
 
@@ -172,13 +172,13 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 
 # Description
 
-Node.js app to analyze call center campaign audios and check if they meet defined requirements (intentions), using OpenAI Whisper for automatic transcription and GPT for semantic analysis.
+Node.js app for analyzing conversation audio for various campaigns (such as support, sales, etc.) and verifying whether it meets defined requirements, such as script tracking, tone, and more, using analytics and AI services.
 
 ## Features
 - Support for multiple campaigns, each with its own checklist and audios.
 - **Two execution modes**: single run (processes and exits) or continuous (watches for new audios).
-- Transcribes audios using the OpenAI Whisper API.
-- Analyzes the transcription with GPT or the audios with Voxtral directly to verify intentions.
+- Transcribe audio using different models (OpenAI with Whisper or Mistral with Voxtral)
+- Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary)
 - **Failure recovery**: Moves problematic audios to a `failed` folder for manual review, without stopping the process.
 - Modular and scalable structure.
 

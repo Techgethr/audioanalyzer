@@ -26,7 +26,7 @@ async function uploadAudio(filePath) {
     });
     return data.id;
   } catch (error) {
-    throw new Error(`Error al subir archivo: ${error.message}`);
+    throw new Error(`Error al subir archivo a Mistral`);
   }
 }
 
@@ -45,7 +45,7 @@ async function getSignedUrl(fileId) {
     });
     return data.url;
   } catch (error) {
-    throw new Error(`Error al obtener URL del archivo: ${error.message}`);
+    throw new Error(`Error al obtener URL del archivo firmado`);
   }
 }
 
@@ -86,7 +86,7 @@ async function requestAnalysis(signedUrl, checklist, language) {
     });
     return {transcription : null, results: data.choices[0].message.content};
   } catch (error) {
-    throw new Error(`Error en la solicitud de análisis: ${error.message}`);
+    throw new Error(`Error en la solicitud de análisis`);
   }
 }
 
@@ -108,8 +108,7 @@ async function transcribeAudio(filePath) {
     });
     return data.text;
   } catch (error) {
-    console.error('❌ Error en el flujo:', error.message);
-    return null;
+    throw new Error(`Error en la transcripción del audio`);
   }
 }
 
@@ -141,7 +140,7 @@ async function analyzeWithTranscription(filePath, checklist, language) {
     });
     return {transcription : transcription, results: data.choices[0].message.content };
   } catch (error) {
-    throw new Error(`Error al subir archivo: ${error.message}`);
+    throw new Error(`Error al subir archivo para análisis con transcripción`);
   }
 }
 
