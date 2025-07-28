@@ -1,93 +1,68 @@
 
 
-function getSystemMessage(language) {
-    var systemMessage = "";
-    if(language == "es") {
-        systemMessage = "Eres un asistente que evalúa distintos aspectos de calidad en una conversación.";
-    }
-    if(language == "en") {
-        systemMessage = "You are an assistant who evaluates different aspects of quality in a conversation.";
-    }
+function getSystemMessage() {
+    var systemMessage = `You are an assistant who evaluates different aspects of quality in a conversation. Your tasks are:
+            1. Analyze the content of the conversation based on a checklist.
+            2. Identify emotional tones and relevant emotions in the participants.
+            3. Assess the communication tone for professionalism and empathy.
+            4. Evaluate the technical quality of the audio.
+            5. Provide a detailed breakdown of strengths and areas for improvement.
+            6. Provide an overall compliance score based on the previous analyses.
+            `;
     return systemMessage;
 }
 
 function getPrompt(language, checklist, transcription) {
-    var prompt = "";
     const includeTranscription = transcription && transcription.trim() != "" && transcription != undefined && transcription != null;
-    var promptStart = "";
-    if(language == "es") {
-        promptStart = includeTranscription ? `Dada la siguiente transcripción de una llamada: "${transcription}"`: "Dado este audio de una llamada";
-        prompt = `${promptStart}, realiza los siguientes análisis:
+    var languageSelection = language == "es" ? "Spanish" : "English";
+    var promptStart = includeTranscription ? `Given the following call transcript: "${transcription} of a conversation"`: "Given this call audio of a conversation";
+    
+    var prompt = `${promptStart}, and the following checklist of content that should be present in the conversation:
+            ${checklist.map((c, i) => `${i+1}. ${c}`).join('\n')}. 
+            
+            Perform the following analyses:
 
-            1. **Checklist de contenido**  
-            Responde SÍ o NO para cada uno de los siguientes puntos que deberían estar presentes en el audio. Justifica brevemente tu respuesta en cada ítem:  
-            Checklist:  
-            ${checklist.map((c, i) => `${i+1}. ${c}`).join('\n')}
+            1. Checklist compliance: Check if each of the following points that is present in the audio. Briefly justify your answer for each item.
 
-            Formato de respuesta:  
-            1. SÍ/NO – Justificación  
-            2. SÍ/NO – Justificación  
-            ...
+            2. Emotional Analysis: Detect if any of the participants exhibit relevant emotions (e.g., anger, happiness, frustration).
 
-            2. **Análisis emocional**  
-            Detecta si hay presencia de emociones relevantes (ej: enojo, felicidad, frustración) en alguno de los participantes.  
-            Ejemplo de respuesta:  
-            - Emoción predominante: [nombre de emoción]  
-            - Justificación: [detalle de tono, velocidad, palabras clave]
+            3. Communication Tone Assessment: Was the tone of voice professional, empathetic, and appropriate for the context?
 
-            3. **Evaluación del tono comunicacional**  
-            ¿El tono de voz fue profesional, empático y adecuado para el contexto?  
-            Ejemplo:  
-            - Tono profesional: SÍ/NO – Justificación  
-            - Tono empático: SÍ/NO – Justificación
+            4. Technical audio quality: Evaluate whether the audio is free of interference, echoes, or external noise.
 
-            4. **Calidad técnica del audio**  
-            Evalúa si el audio está libre de interferencias, ecos o ruidos externos.  
-            Ejemplo:  
-            - Calidad técnica adecuada: SÍ/NO – Justificación
+            5. Compliance summary: Provide an overall score for compliance with the expected standards in the conversation, based on the previous points.
 
-            5. **Resumen de cumplimiento**  
-            Entrega una puntuación general del cumplimiento de los estándares esperados en la conversación, basada en los puntos anteriores.
-
-            Responde de forma estructurada y clara.`;
-    }
-    if(language == "en") {
-        promptStart = includeTranscription ? `Given the following call transcript: "${transcription}"`: "Given this call audio";
-        prompt = `${promptStart}, perform the following analyses:
-
-            1. **Content Checklist**
-            Answer YES or NO for each of the following points that should be present in the audio. Briefly justify your answer for each item:
-            Checklist:
-            ${checklist.map((c, i) => `${i+1}. ${c}`).join('\n')}
-
-            Answer Format:
-            1. YES/NO – Justification
-            2. YES/NO – Justification
-            ...
-
-            2. **Emotional Analysis**
-            Detect if any of the participants exhibit relevant emotions (e.g., anger, happiness, frustration).
-
-            Example Response:
-            - Predominant emotion: [name of emotion]
-            - Justification: [details of tone, speed, keywords]
-
-            3. **Communication Tone Assessment**
-            Was the tone of voice professional, empathetic, and appropriate for the context?
-            Example:
-            - Professional tone: YES/NO – Justification
-            - Empathetic tone: YES/NO – Justification
-
-            4. **Technical audio quality**
-            Evaluate whether the audio is free of interference, echoes, or external noise.
-            Example:
-            - Adequate technical quality: YES/NO – Justification
-
-            5. **Compliance summary**
-            Provide an overall score for compliance with the expected standards in the conversation, based on the previous points.
-
-            Respond in a structured and clear manner.`;
-    }
+            DON'T overanalyze; only respond to what is present in the ${includeTranscription ?"transcription":"audio"}.
+            If something is not present in the ${includeTranscription ?"transcription":"audio"}, then don't say it is. 
+            If you analyze a transcript, the audio quality analysis does not apply.
+            Submit your answers and justifications in ${languageSelection}.
+            
+            Please provide your analysis in the following JSON format:
+            {
+                "complianceScore": number, // Score from 0-10 based on the standard communication scoring system
+                "overallFeedback": string,   // 2-5 sentence of the compliance summary
+                "emotionalAnalysis": {       // Analysis of emotional tones
+                    "predominantEmotion": string, // Name of the predominant emotion
+                    "justification": string // Justification of the emotional analysis
+                },
+                "communicationTone": {       // Assessment of communication tone 
+                    "professionalTone": boolean, // Whether the tone was professional
+                    "empatheticTone": boolean,   // Whether the tone was empathetic
+                    "appropriateTone": boolean,   // Whether the tone was appropriate
+                    "justification": string       // Justification for the tone assessment
+                },
+                "technicalQuality": {         // Assessment of technical audio quality (if possible)
+                    "adequateQuality": boolean, // Whether the audio quality was adequate
+                    "justification": string      // Justification for the technical quality assessment
+                },
+                "checklistResults": {         // Results of the content checklist
+                    "1": { property:string, "result": boolean, "justification": string }, // Property of the checklist, result and justification for each checklist item
+                    "2": { property:string, "result": boolean, "justification": string },
+                    // ...
+                },
+                "strengths": [string],       // List of communication strengths demonstrated (if existing)
+                "improvementAreas": [string] // List of areas where communication could be improved (if existing)
+            }`;
 
     return prompt;
 }
@@ -97,7 +72,7 @@ function getInstructions(language, checklist, transcription) {
     if(language == "" || language == undefined || language == null) {
         language = "es";
     }
-    const systemMessage = getSystemMessage(language);
+    const systemMessage = getSystemMessage();
     const prompt = getPrompt(language, checklist, transcription);
 
     return {prompt: prompt, systemMessage: systemMessage };

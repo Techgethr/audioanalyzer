@@ -22,9 +22,6 @@ function saveResult(campaignName, file, transcription, checklist, gptResult) {
     'Transcription:',
     transcription,
     '',
-    'Checklist:',
-    ...checklist.map((c, i) => `${i+1}. ${c}`),
-    '',
     'Results:',
     gptResult,
     ''
