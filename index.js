@@ -11,15 +11,15 @@ const s3 = new AWS.S3();
 
 async function processAudioFile(campaignName, file, checklist, language) {
   const filePath = getAudioPath(campaignName, file);
-  console.log(`\n-> Procesando: ${file}`);
+  console.log(`\n-> Processing: ${file}`);
   try {
     const gptResult = await analyzeAudio(filePath, checklist, language);
-    saveResult(campaignName, file, gptResult.transcription, checklist, gptResult.results);
+    await saveResult(campaignName, file, gptResult.transcription, gptResult.results);
     moveAudioToProcessed(campaignName, file, filePath);
-    console.log(`   ÉXITO: ${file} procesado correctamente.`);
+    console.log(`   SUCCESS: ${file} processed successfully.`);
     
   } catch (err) {
-    console.error(`   ERROR al procesar ${file}: ${err.message}`);
+    console.error(`   ERROR processing ${file}: ${err.message}`);
     handleFailedAudio(campaignName, file, filePath, err);
   }
 }
@@ -28,12 +28,12 @@ async function runOnce(campaignArg) {
   const campaignsToProcess = campaignArg ? [campaignArg] : getCampaigns();
   
   if (campaignsToProcess.length === 0) {
-    console.log(campaignArg ? `No se encontró la campaña '${campaignArg}'.` : "No se encontraron campañas.");
+    console.log(campaignArg ? `Campaign '${campaignArg}' not found.` : "No campaigns found.");
     return;
   }
 
   for (const campaignName of campaignsToProcess) {
-    console.log(`\n--- Iniciando campaña: ${campaignName} ---`);
+    console.log(`\n--- Starting campaign: ${campaignName} ---`);
     
     let checklist;
     let language;
@@ -42,44 +42,44 @@ async function runOnce(campaignArg) {
       language = fullCheckList.language;
       checklist = fullCheckList.checklist;
     } catch (err) {
-      console.error(`Error al iniciar campaña ${campaignName}: ${err.message}`);
+      console.error(`Error starting campaign ${campaignName}: ${err.message}`);
       continue;
     }
     
     const audios = getAudios(campaignName);
     if (audios.length === 0) {
-      console.log(`No se encontraron audios para la campaña ${campaignName}.`);
+      console.log(`No audios found for campaign ${campaignName}.`);
       continue;
     }
 
-    console.log(`Se procesarán ${audios.length} audios.`);
+    console.log(`Processing ${audios.length} audios.`);
     for (const file of audios) {
       await processAudioFile(campaignName, file, checklist, language);
     }
   }
-  console.log("\n--- Todas las campañas han sido procesadas ---");
+  console.log("\n--- All campaigns have been processed ---");
 }
 
 function runWatcher(campaignArg) {
     let watchPath;
     if (campaignArg) {
-        // Vigilar solo una campaña específica
+        // Watch only a specific campaign
         const audiosDir = path.join(__dirname, 'campaigns', campaignArg, 'audios');
         if (!fs.existsSync(audiosDir)) {
-            console.log(`La carpeta '${audiosDir}' no existe. Creándola...`);
+            console.log(`The folder '${audiosDir}' does not exist. Creating it...`);
             fs.mkdirSync(audiosDir, { recursive: true });
         }
         watchPath = audiosDir;
-        console.log(`Modo de vigilancia activado SOLO para la campaña '${campaignArg}'. Esperando nuevos audios en ${watchPath} ...`);
+        console.log(`Watcher mode activated for campaign '${campaignArg}'. Waiting for new audios in ${watchPath} ...`);
     } else {
-        // Vigilar todas las campañas
+        // Watch all campaigns
         const campaignsDir = path.join(__dirname, 'campaigns');
         if (!fs.existsSync(campaignsDir)) {
-            console.log("La carpeta 'campaigns' no existe. Creándola...");
+            console.log("The 'campaigns' folder does not exist. Creating it...");
             fs.mkdirSync(campaignsDir);
         }
         watchPath = campaignsDir;
-        console.log('Modo de vigilancia activado. Esperando nuevos audios en campaigns/[campaign]/audios/ ...');
+        console.log('Watcher mode activated. Waiting for new audios in campaigns/[campaign]/audios/ ...');
     }
 
     const watcher = chokidar.watch(watchPath, {
@@ -110,19 +110,19 @@ function runWatcher(campaignArg) {
             campaignName = parts[0];
             file = parts[2];
         }
-        console.log(`\n-> Nuevo audio detectado: ${file} en campaña ${campaignName}`);
+        console.log(`\n-> New audio detected: ${file} in campaign ${campaignName}`);
         try {
             const fullCheckList = getChecklist(campaignName);
             const checklist = fullCheckList.checklist;
             const language = fullCheckList.language;
             await processAudioFile(campaignName, file, checklist,language);
         } catch(err) {
-            console.error(`Error al procesar nuevo audio en modo vigilancia: ${err.message}`);
+            console.error(`Error processing new audio in watcher mode: ${err.message}`);
             handleFailedAudio(campaignName, file, absolutePath, err);
         }
     });
     
-    watcher.on('error', error => console.error(`Error en el vigilante: ${error}`));
+    watcher.on('error', error => console.error(`Error in watcher: ${error}`));
 }
 
 function main() {
@@ -181,23 +181,23 @@ exports.handler = async (event) => {
     return { statusCode: 500, body: 'Error downloading checklist.txt from S3' };
   }
 
-  // Procesar el archivo de audio
+  // Process the audio file
   try {
     const transcription = await transcribeAudio(tmpFilePath);
     const gptResult = await analyzeWithGPT(transcription, checklist);
 
-    // Guardar resultado en S3 (en processed/)
+    // Save result in S3 (in processed/)
     const resultText = [
-      `Archivo: ${file}`,
-      `Campaña: ${campaignName}`,
+      `File: ${file}`,
+      `Campaign: ${campaignName}`,
       '',
-      'Transcripción:',
+      'Transcription:',
       transcription,
       '',
       'Checklist:',
       ...checklist.map((c, i) => `${i+1}. ${c}`),
       '',
-      'Resultado del análisis GPT:',
+      'Result:',
       gptResult,
       ''
     ].join('\n');
@@ -209,7 +209,7 @@ exports.handler = async (event) => {
       ContentType: 'text/plain'
     }).promise();
 
-    // Mover el audio procesado a processed/
+    // Move the processed audio to processed/
     const processedAudioKey = `processed/${campaignName}/${file}`;
     await s3.copyObject({
       Bucket: bucket,
@@ -218,10 +218,10 @@ exports.handler = async (event) => {
     }).promise();
     await s3.deleteObject({ Bucket: bucket, Key: key }).promise();
 
-    return { statusCode: 200, body: 'Audio procesado correctamente' };
+    return { statusCode: 200, body: 'Audio processed successfully' };
   } catch (err) {
-    console.error('Error procesando audio:', err);
-    // Guardar log de error en S3
+    console.error('Error processing audio:', err);
+    // Save error log in S3
     const failedKey = `processed/${campaignName}/failed/${file.replace(/\.[^/.]+$/, '.log')}`;
     const errorText = `Failed to process ${file} for campaign ${campaignName}.\nError: ${err.stack || err.message}\nTimestamp: ${new Date().toISOString()}`;
     await s3.putObject({
@@ -230,7 +230,7 @@ exports.handler = async (event) => {
       Body: errorText,
       ContentType: 'text/plain'
     }).promise();
-    // Mover el audio a failed
+    // Move the audio to failed
     const failedAudioKey = `processed/${campaignName}/failed/${file}`;
     await s3.copyObject({
       Bucket: bucket,
@@ -238,7 +238,7 @@ exports.handler = async (event) => {
       Key: failedAudioKey
     }).promise();
     await s3.deleteObject({ Bucket: bucket, Key: key }).promise();
-    return { statusCode: 500, body: 'Error procesando audio' };
+    return { statusCode: 500, body: 'Error processing audio in S3' };
   }
 };
 

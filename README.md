@@ -5,6 +5,7 @@
 - [Características](#características)
 - [Estructura del Proyecto](#estructura-del-proyecto)
 - [Configuración](#configuración)
+- [Base de datos](#base-de-datos)
 - [Modos de Uso](#modos-de-uso)
 - [Manejo de Errores](#manejo-de-errores)
 - [Ejemplo de checklist.txt](#ejemplo-de-checklisttxt)
@@ -21,6 +22,7 @@ App en Node.js para analizar audios de conversaciones para distintas campañas (
 - **Dos modos de ejecución**: única (procesa y termina) o continua (vigila nuevos audios).
 - Transcribe audios usando distintos modelos (OpenAI con Whisper o Mistral con Voxtral)
 - Analiza audios de detalle y justificación (seguimiento de un script predefinido de conversación, análisis emocional y del tono, calidad del audio, y resumen de cumplimiento)
+- Inserta los resultados de manera estructura en una base de datos para su posterior análisis. 
 - **Recuperación ante fallos**: Mueve los audios problemáticos a una carpeta `failed` para revisión manual, sin detener el proceso.
 - Estructura modular y escalable.
 
@@ -35,9 +37,7 @@ audioanalyzer/
 │   ├── resultWriter.js
 │   └── services
 │       └── ai
-│           └── index.js
-│           └── openai.js
-│           └── voxtral.js
+│       └── database
 ├── package.json
 ├── .env
 ├── README.md
@@ -56,7 +56,7 @@ audioanalyzer/
 
 - **src/**: Lógica del sistema, modularizada.
 - **campaigns/**: Contiene las carpetas de cada campaña, con su `checklist.txt` y carpeta `audios/`.
-- **processed/**: Guarda los audios procesados y sus resultados. Incluye una subcarpeta `failed/` para los audios que no se pudieron procesar.
+- **processed/**: Guarda los audios procesados y sus resultados en caso de no usar base de datos. Incluye una subcarpeta `failed/` para los audios que no se pudieron procesar.
 
 ## Configuración
 
@@ -84,7 +84,21 @@ audioanalyzer/
      # Si quieres hacer transcripción previamente al análisis con Mistral, configura las siguientes variables
      MISTRAL_INCLUDE_TRANSCRIPTION=true or false
      MISTRAL_MODEL_TEXT=
+
+     # Si usas base de datos (sino, solo se guardan los resultados en el archivo de texto)
+     DB_ENGINE=supabase
+
+     # Supabase Configuration
+     SUPABASE_URL=
+     SUPABASE_ANON_KEY=
+     SUPABASE_TABLE_NAME=
      ```
+
+## Base de datos
+
+Actualmente se soporta solo Supabase como base de datos.
+
+Para más detalles sobre cómo usar la base de datos y configurar otros motores, consulta el [Readme específico](./src/services/database/README.md)
 
 ## Modos de Uso
 
@@ -164,6 +178,7 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 - [Features](#features)
 - [Project Structure](#project-structure)
 - [Setup](#setup)
+- [Database](#database)
 - [Usage Modes](#usage-modes)
 - [Error Handling](#error-handling)
 - [Example checklist.txt](#example-checklisttxt)
@@ -179,6 +194,7 @@ Node.js app for analyzing conversation audio for various campaigns (such as supp
 - **Two execution modes**: single run (processes and exits) or continuous (watches for new audios).
 - Transcribe audio using different models (OpenAI with Whisper or Mistral with Voxtral)
 - Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary)
+- Inserts the results in a structured manner into a database for further analysis.
 - **Failure recovery**: Moves problematic audios to a `failed` folder for manual review, without stopping the process.
 - Modular and scalable structure.
 
@@ -193,9 +209,7 @@ audioanalyzer/
 │   ├── resultWriter.js
 │   └── services
 │       └── ai
-│           └── index.js
-│           └── openai.js
-│           └── voxtral.js
+│       └── database
 ├── package.json
 ├── .env
 ├── README.md
@@ -241,7 +255,21 @@ audioanalyzer/
      # If you want to transcribe before analyzing with Mistral, configure the following variables
      MISTRAL_INCLUDE_TRANSCRIPTION=true or false
      MISTRAL_MODEL_TEXT=
+
+     # If you want to use a database (otherwise, results are only saved in the text file)
+     DB_ENGINE=supabase
+
+     # Supabase Configuration
+     SUPABASE_URL=
+     SUPABASE_ANON_KEY=
+     SUPABASE_TABLE_NAME=
      ```
+
+## Database
+
+Currently, only Supabase is supported as a database.
+
+For more details on how to use the database and configure other engines, see the [specific README](./src/services/database/README.md)
 
 ## Usage Modes
 

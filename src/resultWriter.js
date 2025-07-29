@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const database = require('./services/database');
 
 const PROCESSED_DIR = path.resolve(__dirname, '..', 'processed');
 
@@ -9,25 +10,67 @@ function ensureDir(dir) {
   }
 }
 
-function saveResult(campaignName, file, transcription, checklist, gptResult) {
-  const dir = path.join(PROCESSED_DIR, campaignName);
-  ensureDir(dir);
+async function saveResult(campaignName, file, transcription, gptResult) {
+  let jsonResult;
+  gptResult = gptResult.replace("```json", "");
+  gptResult = gptResult.replace("```", "");
+  gptResult = gptResult.trim();
+  if(!process.env.DB_ENGINE){
+    const dir = path.join(PROCESSED_DIR, campaignName);
+    ensureDir(dir);
+    
+    
+    
+    const txtFileName = file.replace(/\.[^/.]+$/, '.txt');
+    const txtFilePath = path.join(dir, txtFileName);
+    const resultText = [
+      `File: ${file}`,
+      `Campaign: ${campaignName}`,
+      '',
+      'Transcription:',
+      transcription,
+      '',
+      'Results:',
+      gptResult,
+      ''
+    ].join('\n');
+    
+    // Save to file
+    fs.writeFileSync(txtFilePath, resultText, 'utf-8');
+    console.log(`Result saved in file: ${txtFilePath}`);
+  } else {
+    // Save to database
+  try {
+    jsonResult = JSON.parse(gptResult);
+    const resultData = {
+        campaignName,
+        fileName: file,
+        transcription: transcription || null,
+        complianceScore: jsonResult.complianceScore || 0,
+        overallFeedback: jsonResult.overallFeedback || '',
+        predominantEmotion: jsonResult.emotionalAnalysis.predominantEmotion || null,
+        predominantEmotionJustification: jsonResult.emotionalAnalysis.justification || null,
+        professionalTone: jsonResult.communicationTone.professionalTone,
+        empatheticTone: jsonResult.communicationTone.empatheticTone,
+        appropriateTone: jsonResult.communicationTone.appropriateTone,
+        communicationToneJustification: jsonResult.communicationTone.justification || null,
+        technicalQualityAdequate: jsonResult.technicalQuality.adequateQuality,
+        technicalQualityJustification: jsonResult.technicalQuality.justification || null,
+        checklistResults: jsonResult.checklistResults || {},
+        strengths: jsonResult.strengths || [],
+        improvementAreas: jsonResult.improvementAreas || [],
+        processedAt: new Date()
+      };
+      
+      await database.saveResult(resultData);
+      console.log(`Result saved in database for: ${file}`);
+    } catch (error) {
+      console.error(`Error saving in database for ${file}:`, error.message);
+      // Continue execution even if database save fails
+    }
+  }
   
-  const txtFileName = file.replace(/\.[^/.]+$/, '.txt');
-  const txtFilePath = path.join(dir, txtFileName);
-  const resultText = [
-    `File: ${file}`,
-    `Campaign: ${campaignName}`,
-    '',
-    'Transcription:',
-    transcription,
-    '',
-    'Results:',
-    gptResult,
-    ''
-  ].join('\n');
   
-  fs.writeFileSync(txtFilePath, resultText, 'utf-8');
 }
 
 function moveAudioToProcessed(campaignName, file, srcPath) {
@@ -35,7 +78,7 @@ function moveAudioToProcessed(campaignName, file, srcPath) {
   ensureDir(dir);
   const destPath = path.join(dir, file);
   fs.renameSync(srcPath, destPath);
-  console.log(`Archivo movido a processed/${campaignName}/${file}`);
+  console.log(`Audio moved to processed/${campaignName}/${file}`);
 }
 
 function handleFailedAudio(campaignName, file, srcPath, error) {
@@ -50,17 +93,17 @@ function handleFailedAudio(campaignName, file, srcPath, error) {
     fs.writeFileSync(logFilePath, errorText, 'utf-8');
     console.log(`Log de error guardado en: ${logFilePath}`);
   } catch (writeErr) {
-    console.error(`CRITICO: No se pudo guardar el log de error para ${file}: ${writeErr.message}`);
+    console.error(`CRITICAL: Could not save error log for ${file}: ${writeErr.message}`);
   }
   
   const destPath = path.join(failedDir, file);
   try {
     if (fs.existsSync(srcPath)) {
         fs.renameSync(srcPath, destPath);
-        console.error(`Archivo ${file} movido a la carpeta de fallidos.`);
+        console.error(`Audio ${file} moved to failed directory.`);
     }
   } catch (moveErr) {
-    console.error(`CRITICO: No se pudo mover el archivo fallido ${file} a ${failedDir}: ${moveErr.message}`);
+    console.error(`CRITICAL: Could not move failed audio ${file} to ${failedDir}: ${moveErr.message}`);
   }
 }
 

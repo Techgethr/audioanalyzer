@@ -46,13 +46,13 @@ function getPrompt(language, checklist, transcription) {
                     "justification": string // Justification of the emotional analysis
                 },
                 "communicationTone": {       // Assessment of communication tone 
-                    "professionalTone": boolean, // Whether the tone was professional
-                    "empatheticTone": boolean,   // Whether the tone was empathetic
-                    "appropriateTone": boolean,   // Whether the tone was appropriate
+                    "professionalTone": boolean, // Whether the tone was professional (true or false)
+                    "empatheticTone": boolean,   // Whether the tone was empathetic (true or false)
+                    "appropriateTone": boolean,   // Whether the tone was appropriate (true or false)
                     "justification": string       // Justification for the tone assessment
                 },
                 "technicalQuality": {         // Assessment of technical audio quality (if possible)
-                    "adequateQuality": boolean, // Whether the audio quality was adequate
+                    "adequateQuality": boolean, // Whether the audio quality was adequate (true or false)
                     "justification": string      // Justification for the technical quality assessment
                 },
                 "checklistResults": {         // Results of the content checklist
