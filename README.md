@@ -72,10 +72,15 @@ audioanalyzer/
      ```
      AI_SERVICE=openai o voxtral
 
-     # Si usas OpenAI
+     # Si usas OpenAI para transcripción
      OPENAI_API_KEY=tu_api_key_aqui
-     OPENAI_MODEL_AUDIO=whisper-1
-     OPENAI_MODEL_TEXT=gpt-3.5-turbo
+     OPENAI_BASE_URL= (si nada, usará el default)
+     OPENAI_MODEL=
+
+     # Si usas Whisper para análisis
+     WHISPER_BASE_URL= (si nada, usará el default de OpenAI)
+     WHISPER_MODEL=whisper-1
+     WHISPER_API_KEY= (podría ser la misma que OPENAI_API_KEY)
 
      # Si usas Voxtral
      MISTRAL_API_KEY=tu_mistral_api_key
@@ -244,9 +249,15 @@ audioanalyzer/
      ```
      AI_SERVICE=openai or voxtral
 
-     OPENAI_API_KEY=your_api_key_here
-     OPENAI_MODEL_AUDIO=whisper-1
-     OPENAI_MODEL_TEXT=gpt-3.5-turbo
+     # If OpenAI is used
+     OPENAI_API_KEY=tu_api_key_aqui
+     OPENAI_BASE_URL= (if nothing it will use the default from OpenAI)
+     OPENAI_MODEL=
+
+     # If Whisper is used
+     WHISPER_BASE_URL= (if nothing it will use the default from OpenAI)
+     WHISPER_MODEL=whisper-1
+     WHISPER_API_KEY= (it could be the same as OPENAI_API_KEY)
 
      # IF Voxtral is used
      MISTRAL_API_KEY=tu_mistral_api_key

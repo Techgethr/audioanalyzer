@@ -10,16 +10,10 @@ function ensureDir(dir) {
   }
 }
 
-async function saveResult(campaignName, file, transcription, gptResult) {
-  let jsonResult;
-  gptResult = gptResult.replace("```json", "");
-  gptResult = gptResult.replace("```", "");
-  gptResult = gptResult.trim();
+async function saveResult(campaignName, file, transcription, results) {
   if(!process.env.DB_ENGINE){
     const dir = path.join(PROCESSED_DIR, campaignName);
     ensureDir(dir);
-    
-    
     
     const txtFileName = file.replace(/\.[^/.]+$/, '.txt');
     const txtFilePath = path.join(dir, txtFileName);
@@ -31,7 +25,7 @@ async function saveResult(campaignName, file, transcription, gptResult) {
       transcription,
       '',
       'Results:',
-      gptResult,
+      JSON.stringify(results),
       ''
     ].join('\n');
     
@@ -41,24 +35,23 @@ async function saveResult(campaignName, file, transcription, gptResult) {
   } else {
     // Save to database
   try {
-    jsonResult = JSON.parse(gptResult);
     const resultData = {
         campaignName,
         fileName: file,
         transcription: transcription || null,
-        complianceScore: jsonResult.complianceScore || 0,
-        overallFeedback: jsonResult.overallFeedback || '',
-        predominantEmotion: jsonResult.emotionalAnalysis.predominantEmotion || null,
-        predominantEmotionJustification: jsonResult.emotionalAnalysis.justification || null,
-        professionalTone: jsonResult.communicationTone.professionalTone,
-        empatheticTone: jsonResult.communicationTone.empatheticTone,
-        appropriateTone: jsonResult.communicationTone.appropriateTone,
-        communicationToneJustification: jsonResult.communicationTone.justification || null,
-        technicalQualityAdequate: jsonResult.technicalQuality.adequateQuality,
-        technicalQualityJustification: jsonResult.technicalQuality.justification || null,
-        checklistResults: jsonResult.checklistResults || {},
-        strengths: jsonResult.strengths || [],
-        improvementAreas: jsonResult.improvementAreas || [],
+        complianceScore: results.complianceScore || 0,
+        overallFeedback: results.overallFeedback || '',
+        predominantEmotion: results.emotionalAnalysis.predominantEmotion || null,
+        predominantEmotionJustification: results.emotionalAnalysis.justification || null,
+        professionalTone: results.communicationTone.professionalTone,
+        empatheticTone: results.communicationTone.empatheticTone,
+        appropriateTone: results.communicationTone.appropriateTone,
+        communicationToneJustification: results.communicationTone.justification || null,
+        technicalQualityAdequate: results.technicalQuality.adequateQuality,
+        technicalQualityJustification: results.technicalQuality.justification || null,
+        checklistResults: results.checklistResults || {},
+        strengths: results.strengths || [],
+        improvementAreas: results.improvementAreas || [],
         processedAt: new Date()
       };
       
@@ -69,8 +62,6 @@ async function saveResult(campaignName, file, transcription, gptResult) {
       // Continue execution even if database save fails
     }
   }
-  
-  
 }
 
 function moveAudioToProcessed(campaignName, file, srcPath) {

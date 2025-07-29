@@ -1,7 +1,7 @@
 {
   "name": "audioanalyzer",
   "version": "1.0.0",
-  "description": "App para analizar audios y verificar cumplimiento de script usando OpenAI.",
+  "description": "App to analyze audios and verify script compliance (QA) using AI.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"

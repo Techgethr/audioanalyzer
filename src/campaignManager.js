@@ -19,8 +19,8 @@ function getChecklist(campaignName) {
     .map(line => line.trim())
     .filter(Boolean);
 
-  const language = lines[0]; // Primera línea como idioma
-  const checklist = lines.slice(1); // Resto como checklist
+  const language = lines[0]; // Language
+  const checklist = lines.slice(1); // Checklist
 
   return { language, checklist };
 }
