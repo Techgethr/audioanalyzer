@@ -1,4 +1,187 @@
-# Audio Analyzer
+# Audio QA Analyzer
+
+## Index
+- [Description](#description)
+- [Features](#features)
+- [Project Structure](#project-structure)
+- [Setup](#setup)
+- [Database](#database)
+- [Usage Modes](#usage-modes)
+- [Error Handling](#error-handling)
+- [Example checklist.txt](#example-checklisttxt)
+- [Requirements](#requirements)
+- [AWS Lambda Usage with S3](#aws-lambda-usage-with-s3)
+- [Spanish Version](#spanish-version)
+
+# Description
+
+Node.js app for analyzing conversation audio for various campaigns (such as support, sales, etc.) and verifying whether it meets defined requirements, such as script tracking (checklist), comments or phrases that should not be used, tone, audio quality, and more, using analytics and AI services.
+
+## Features
+- Support for multiple campaigns, each with its own checklist and audios.
+- **Two execution modes**: single run (processes and exits) or continuous (watches for new audios).
+- Transcribe audio using different models (OpenAI with Whisper, Mistral with Voxtral or any model compatible with OpenAI SDK)
+- Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary)
+- Inserts the results in a structured manner into a database for further analysis.
+- **Data protection**: Does not include personal information (PII) or sensitive data (e.g., credit card numbers, social security numbers, etc.) in the analysis and hides this information in the JSON response (use [SENSITIVE] to hide it).
+- **Failure recovery**: Moves problematic audios to a `failed` folder for manual review, without stopping the process.
+- Modular and scalable structure.
+
+## Project Structure
+
+```
+audioanalyzer/
+├── index.js
+├── src/
+│   ├── campaignManager.js
+│   ├── promptManager.js
+│   ├── resultWriter.js
+│   └── services
+│       └── ai
+│       └── database
+├── package.json
+├── .env
+├── README.md
+├── campaigns/
+│   └── [campaign_name]/
+│       ├── checklist.txt
+│       └── audios/
+└── processed/
+    └── [campaign_name]/
+        ├── [processed_audio]
+        ├── [result.txt]
+        └── failed/
+            ├── [failed_audio]
+            └── [error.log]
+```
+
+- **src/**: System logic, modularized.
+- **campaigns/**: Contains each campaign's folder, with its `checklist.txt` and `audios/` folder.
+- **processed/**: Stores processed audios and their results. Includes a `failed/` subfolder for audios that couldn't be processed.
+
+## Setup
+
+1. **Clone the repository and install dependencies:**
+   ```bash
+   git clone <repo-url>
+   cd audioanalyzer
+   npm install
+   ```
+
+2. **Set up your keys:**
+   - Create a `.env` file with the following content:
+     ```
+     AI_SERVICE=openai or voxtral
+
+     # If OpenAI is used
+     OPENAI_API_KEY=tu_api_key_aqui
+     OPENAI_BASE_URL= (if nothing it will use the default from OpenAI)
+     OPENAI_MODEL=
+
+     # If Whisper is used
+     WHISPER_BASE_URL= (if nothing it will use the default from OpenAI)
+     WHISPER_MODEL=whisper-1
+     WHISPER_API_KEY= (it could be the same as OPENAI_API_KEY)
+
+     # IF Voxtral is used
+     MISTRAL_API_KEY=tu_mistral_api_key
+     MISTRAL_MODEL_AUDIO=voxtral_model
+     MISTRAL_ENDPOINT=https://api.mistral.ai/v1
+     # If you want to transcribe before analyzing with Mistral, configure the following variables
+     MISTRAL_INCLUDE_TRANSCRIPTION=true or false
+     MISTRAL_MODEL_TEXT=
+
+     # If you want to use a database (otherwise, results are only saved in the text file)
+     DB_ENGINE=supabase
+
+     # Supabase Configuration
+     SUPABASE_URL=
+     SUPABASE_ANON_KEY=
+     SUPABASE_TABLE_NAME=
+     ```
+
+## Database
+
+Currently, only Supabase is supported as a database.
+
+For more details on how to use the database and configure other engines, see the [specific README](./src/services/database/README.md)
+
+## Usage Modes
+
+There are two ways to run the application.
+
+### 1. Single Run
+Processes all pending audios once and then exits.
+
+- **Process all campaigns:**
+  ```bash
+  npm start
+  ```
+- **Process only a specific campaign:**
+  ```bash
+  npm start [campaign_name]
+  ```
+
+### 2. Continuous Watch Mode
+The script stays active and automatically processes any new audio added to the `campaigns/*/audios/` folders.
+
+- **Activate watch mode:**
+  ```bash
+  npm start -- --watch
+  ```
+  *(The `--` is important to pass the flag to the script through npm).*
+
+## Error Handling
+If an audio cannot be processed (due to network error, API error, etc.), the system is robust:
+- The problematic audio is moved to `processed/[campaign_name]/failed/`.
+- A `.log` file is created next to the audio with error details.
+- The script continues processing other audios without interruption.
+This allows safe re-execution at any time to process pending audios.
+
+## Example checklist.txt
+```
+es
+# DO
+Initial greeting
+Company introduction
+Request for customer number
+Polite farewell
+
+# DONT
+Ask for password
+```
+
+**The first line of the checklist should indicate the language for the analysis (es or en)**
+
+## Requirements
+- Node.js >= 16
+- OpenAI account and API Key with access to Whisper and GPT
+- Or Mistral account and API Key to use Voxtral to analyze the audio instead of OpenAI.
+
+## AWS Lambda Usage with S3
+
+This project can now run as a Lambda function, automatically processing audio files uploaded to an S3 bucket.
+
+### Expected S3 Structure
+- Audios should be uploaded to: `campaigns/[campaign_name]/audios/[file]`
+- The checklist should be at: `campaigns/[campaign_name]/checklist.txt`
+- Results and processed files will be saved in: `processed/[campaign_name]/`
+
+### Deployment Steps:
+1. Package the code (including `node_modules`) into a zip file.
+2. Upload the zip as a Lambda function.
+3. Set the environment variable `OPENAI_API_KEY` and models if needed.
+4. Create an S3 trigger for the Lambda function:
+   - Event: `PUT`
+   - Prefix: `campaigns/`
+   - Suffix: (empty or restricted to audio extensions)
+5. Ensure the Lambda has permissions to read and write to the S3 bucket.
+
+### Notes
+- Processing and saving results is now fully in S3 and `/tmp` (Lambda's temp directory).
+- Watcher mode and local processing remain available for use outside Lambda.
+
+# Spanish Version
 
 ## Índice
 - [Descripción](#descripción)
@@ -181,184 +364,3 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 - El procesamiento y guardado de resultados ahora es completamente en S3 y `/tmp` (directorio temporal de Lambda).
 - El modo watcher y procesamiento local siguen disponibles para uso fuera de Lambda.
 
-# English Version
-
-## Index
-- [Description](#description)
-- [Features](#features)
-- [Project Structure](#project-structure)
-- [Setup](#setup)
-- [Database](#database)
-- [Usage Modes](#usage-modes)
-- [Error Handling](#error-handling)
-- [Example checklist.txt](#example-checklisttxt)
-- [Requirements](#requirements)
-- [AWS Lambda Usage with S3](#aws-lambda-usage-with-s3)
-
-# Description
-
-Node.js app for analyzing conversation audio for various campaigns (such as support, sales, etc.) and verifying whether it meets defined requirements, such as script tracking (checklist), comments or phrases that should not be used, tone, audio quality, and more, using analytics and AI services.
-
-## Features
-- Support for multiple campaigns, each with its own checklist and audios.
-- **Two execution modes**: single run (processes and exits) or continuous (watches for new audios).
-- Transcribe audio using different models (OpenAI with Whisper, Mistral with Voxtral or any model compatible with OpenAI SDK)
-- Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary)
-- Inserts the results in a structured manner into a database for further analysis.
-- **Data protection**: Does not include personal information (PII) or sensitive data (e.g., credit card numbers, social security numbers, etc.) in the analysis and hides this information in the JSON response (use [SENSITIVE] to hide it).
-- **Failure recovery**: Moves problematic audios to a `failed` folder for manual review, without stopping the process.
-- Modular and scalable structure.
-
-## Project Structure
-
-```
-audioanalyzer/
-├── index.js
-├── src/
-│   ├── campaignManager.js
-│   ├── promptManager.js
-│   ├── resultWriter.js
-│   └── services
-│       └── ai
-│       └── database
-├── package.json
-├── .env
-├── README.md
-├── campaigns/
-│   └── [campaign_name]/
-│       ├── checklist.txt
-│       └── audios/
-└── processed/
-    └── [campaign_name]/
-        ├── [processed_audio]
-        ├── [result.txt]
-        └── failed/
-            ├── [failed_audio]
-            └── [error.log]
-```
-
-- **src/**: System logic, modularized.
-- **campaigns/**: Contains each campaign's folder, with its `checklist.txt` and `audios/` folder.
-- **processed/**: Stores processed audios and their results. Includes a `failed/` subfolder for audios that couldn't be processed.
-
-## Setup
-
-1. **Clone the repository and install dependencies:**
-   ```bash
-   git clone <repo-url>
-   cd audioanalyzer
-   npm install
-   ```
-
-2. **Set up your keys:**
-   - Create a `.env` file with the following content:
-     ```
-     AI_SERVICE=openai or voxtral
-
-     # If OpenAI is used
-     OPENAI_API_KEY=tu_api_key_aqui
-     OPENAI_BASE_URL= (if nothing it will use the default from OpenAI)
-     OPENAI_MODEL=
-
-     # If Whisper is used
-     WHISPER_BASE_URL= (if nothing it will use the default from OpenAI)
-     WHISPER_MODEL=whisper-1
-     WHISPER_API_KEY= (it could be the same as OPENAI_API_KEY)
-
-     # IF Voxtral is used
-     MISTRAL_API_KEY=tu_mistral_api_key
-     MISTRAL_MODEL_AUDIO=voxtral_model
-     MISTRAL_ENDPOINT=https://api.mistral.ai/v1
-     # If you want to transcribe before analyzing with Mistral, configure the following variables
-     MISTRAL_INCLUDE_TRANSCRIPTION=true or false
-     MISTRAL_MODEL_TEXT=
-
-     # If you want to use a database (otherwise, results are only saved in the text file)
-     DB_ENGINE=supabase
-
-     # Supabase Configuration
-     SUPABASE_URL=
-     SUPABASE_ANON_KEY=
-     SUPABASE_TABLE_NAME=
-     ```
-
-## Database
-
-Currently, only Supabase is supported as a database.
-
-For more details on how to use the database and configure other engines, see the [specific README](./src/services/database/README.md)
-
-## Usage Modes
-
-There are two ways to run the application.
-
-### 1. Single Run
-Processes all pending audios once and then exits.
-
-- **Process all campaigns:**
-  ```bash
-  npm start
-  ```
-- **Process only a specific campaign:**
-  ```bash
-  npm start [campaign_name]
-  ```
-
-### 2. Continuous Watch Mode
-The script stays active and automatically processes any new audio added to the `campaigns/*/audios/` folders.
-
-- **Activate watch mode:**
-  ```bash
-  npm start -- --watch
-  ```
-  *(The `--` is important to pass the flag to the script through npm).*
-
-## Error Handling
-If an audio cannot be processed (due to network error, API error, etc.), the system is robust:
-- The problematic audio is moved to `processed/[campaign_name]/failed/`.
-- A `.log` file is created next to the audio with error details.
-- The script continues processing other audios without interruption.
-This allows safe re-execution at any time to process pending audios.
-
-## Example checklist.txt
-```
-es
-# DO
-Initial greeting
-Company introduction
-Request for customer number
-Polite farewell
-
-# DONT
-Ask for password
-```
-
-**The first line of the checklist should indicate the language for the analysis (es or en)**
-
-## Requirements
-- Node.js >= 16
-- OpenAI account and API Key with access to Whisper and GPT
-- Or Mistral account and API Key to use Voxtral to analyze the audio instead of OpenAI.
-
-## AWS Lambda Usage with S3
-
-This project can now run as a Lambda function, automatically processing audio files uploaded to an S3 bucket.
-
-### Expected S3 Structure
-- Audios should be uploaded to: `campaigns/[campaign_name]/audios/[file]`
-- The checklist should be at: `campaigns/[campaign_name]/checklist.txt`
-- Results and processed files will be saved in: `processed/[campaign_name]/`
-
-### Deployment Steps:
-1. Package the code (including `node_modules`) into a zip file.
-2. Upload the zip as a Lambda function.
-3. Set the environment variable `OPENAI_API_KEY` and models if needed.
-4. Create an S3 trigger for the Lambda function:
-   - Event: `PUT`
-   - Prefix: `campaigns/`
-   - Suffix: (empty or restricted to audio extensions)
-5. Ensure the Lambda has permissions to read and write to the S3 bucket.
-
-### Notes
-- Processing and saving results is now fully in S3 and `/tmp` (Lambda's temp directory).
-- Watcher mode and local processing remain available for use outside Lambda.
