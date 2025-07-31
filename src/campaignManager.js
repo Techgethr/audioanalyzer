@@ -20,9 +20,28 @@ function getChecklist(campaignName) {
     .filter(Boolean);
 
   const language = lines[0]; // Language
-  const checklist = lines.slice(1); // Checklist
+  let currentSection = null;
+  const doChecklist = [];
+  const dontChecklist = [];
 
-  return { language, checklist };
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.toUpperCase() === '# DO') {
+      currentSection = 'do';
+      continue;
+    }
+    if (line.toUpperCase() === '# DONT') {
+      currentSection = 'dont';
+      continue;
+    }
+    if (currentSection === 'do') {
+      doChecklist.push(line);
+    } else if (currentSection === 'dont') {
+      dontChecklist.push(line);
+    }
+  }
+
+  return { language, doChecklist, dontChecklist };
 }
 
 function getAudios(campaignName) {

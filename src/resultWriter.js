@@ -49,7 +49,8 @@ async function saveResult(campaignName, file, transcription, results) {
         communicationToneJustification: results.communicationTone.justification || null,
         technicalQualityAdequate: results.technicalQuality.adequateQuality,
         technicalQualityJustification: results.technicalQuality.justification || null,
-        checklistResults: results.checklistResults || {},
+        doChecklistResults: results.doChecklistResults || {},
+        dontChecklistResults: results.dontChecklistResults || {},
         strengths: results.strengths || [],
         improvementAreas: results.improvementAreas || [],
         processedAt: new Date()

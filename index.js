@@ -9,11 +9,11 @@ const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
 
 
-async function processAudioFile(campaignName, file, checklist, language) {
+async function processAudioFile(campaignName, file, doChecklist, dontChecklist, language) {
   const filePath = getAudioPath(campaignName, file);
   console.log(`\n-> Processing: ${file}`);
   try {
-    const gptResult = await analyzeAudio(filePath, checklist, language);
+    const gptResult = await analyzeAudio(filePath, doChecklist, dontChecklist, language);
     await saveResult(campaignName, file, gptResult.transcription, gptResult.results);
     moveAudioToProcessed(campaignName, file, filePath);
     console.log(`   SUCCESS: ${file} processed successfully.`);
@@ -35,12 +35,14 @@ async function runOnce(campaignArg) {
   for (const campaignName of campaignsToProcess) {
     console.log(`\n--- Starting campaign: ${campaignName} ---`);
     
-    let checklist;
+    let doChecklist;
+    let dontChecklist;
     let language;
     try {
       const fullCheckList = getChecklist(campaignName);
       language = fullCheckList.language;
-      checklist = fullCheckList.checklist;
+      doChecklist = fullCheckList.doChecklist;
+      dontChecklist = fullCheckList.dontChecklist;
     } catch (err) {
       console.error(`Error starting campaign ${campaignName}: ${err.message}`);
       continue;
@@ -54,7 +56,7 @@ async function runOnce(campaignArg) {
 
     console.log(`Processing ${audios.length} audios.`);
     for (const file of audios) {
-      await processAudioFile(campaignName, file, checklist, language);
+      await processAudioFile(campaignName, file, doChecklist, dontChecklist, language);
     }
   }
   console.log("\n--- All campaigns have been processed ---");

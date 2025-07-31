@@ -15,7 +15,7 @@
 
 # Descripción
 
-App en Node.js para analizar audios de conversaciones para distintas campañas (como soporte, ventas, etc.) y verificar si cumplen con requisitos definidos, como seguimiento de scripts, tono, y mucho más, usando análisis y servicios de AI. 
+App en Node.js para analizar audios de conversaciones para distintas campañas (como soporte, ventas, etc.) y verificar si cumplen con requisitos definidos, como seguimiento de scripts (checklist), comentarios o frases que no deben ser usadas, emocional, tono, calidad del audio, y mucho más, usando análisis y servicios de AI. 
 
 ## Características
 - Soporte para múltiples campañas, cada una con su propio checklist y audios.
@@ -23,6 +23,7 @@ App en Node.js para analizar audios de conversaciones para distintas campañas (
 - Transcribe audios usando distintos modelos (OpenAI con Whisper o Mistral con Voxtral)
 - Analiza audios de detalle y justificación (seguimiento de un script predefinido de conversación, análisis emocional y del tono, calidad del audio, y resumen de cumplimiento)
 - Inserta los resultados de manera estructura en una base de datos para su posterior análisis. 
+- **Protección de datos**: No incluye información personal (PII) ni datos sensibles (como números de tarjetas de crédito, números de seguridad social, etc.) en el análisis y oculta esta información en la respuesta JSON (usa [SENSITIVE] para ocultarla).
 - **Recuperación ante fallos**: Mueve los audios problemáticos a una carpeta `failed` para revisión manual, sin detener el proceso.
 - Estructura modular y escalable.
 
@@ -140,10 +141,14 @@ Esto permite una re-ejecución segura en cualquier momento para procesar los aud
 ## Ejemplo de checklist.txt
 ```
 es
+# DO
 Saludo inicial
 Presentación de la empresa
 Solicitud de número de cliente
 Despedida cordial
+
+# DONT
+Preguntar sobre cuál es la contraseña al usuario
 ```
 
 **La primera línea del checklist debe indicar el idioma para el análisis (es o en)**
@@ -192,7 +197,7 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 
 # Description
 
-Node.js app for analyzing conversation audio for various campaigns (such as support, sales, etc.) and verifying whether it meets defined requirements, such as script tracking, tone, and more, using analytics and AI services.
+Node.js app for analyzing conversation audio for various campaigns (such as support, sales, etc.) and verifying whether it meets defined requirements, such as script tracking (checklist), comments or phrases that should not be used, tone, audio quality, and more, using analytics and AI services.
 
 ## Features
 - Support for multiple campaigns, each with its own checklist and audios.
@@ -200,6 +205,7 @@ Node.js app for analyzing conversation audio for various campaigns (such as supp
 - Transcribe audio using different models (OpenAI with Whisper or Mistral with Voxtral)
 - Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary)
 - Inserts the results in a structured manner into a database for further analysis.
+- **Data protection**: Does not include personal information (PII) or sensitive data (e.g., credit card numbers, social security numbers, etc.) in the analysis and hides this information in the JSON response (use [SENSITIVE] to hide it).
 - **Failure recovery**: Moves problematic audios to a `failed` folder for manual review, without stopping the process.
 - Modular and scalable structure.
 
@@ -316,11 +322,15 @@ This allows safe re-execution at any time to process pending audios.
 
 ## Example checklist.txt
 ```
-en
+es
+# DO
 Initial greeting
 Company introduction
 Request for customer number
 Polite farewell
+
+# DONT
+Ask for password
 ```
 
 **The first line of the checklist should indicate the language for the analysis (es or en)**

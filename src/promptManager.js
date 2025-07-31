@@ -12,13 +12,16 @@ function getSystemMessage() {
     return systemMessage;
 }
 
-function getPrompt(language, checklist, transcription) {
+function getPrompt(language, doChecklist, dontChecklist, transcription) {
     const includeTranscription = transcription && transcription.trim() != "" && transcription != undefined && transcription != null;
     var languageSelection = language == "es" ? "Spanish" : "English";
     var promptStart = includeTranscription ? `Given the following call transcript: "${transcription} of a conversation"`: "Given this call audio of a conversation";
     
     var prompt = `${promptStart}, and the following checklist of content that should be present in the conversation:
-            ${checklist.map((c, i) => `${i+1}. ${c}`).join('\n')}. 
+            ${doChecklist.map((c, i) => `${i+1}. ${c}`).join('\n')}. 
+            
+            And the following checklist of content that should not be present in the conversation:
+            ${dontChecklist.map((c, i) => `${i+1}. ${c}`).join('\n')}. 
             
             Perform the following analyses:
 
@@ -35,6 +38,8 @@ function getPrompt(language, checklist, transcription) {
             DON'T overanalyze; only respond to what is present in the ${includeTranscription ?"transcription":"audio"}.
             If something is not present in the ${includeTranscription ?"transcription":"audio"}, then don't say it is. 
             If you analyze a transcript, the audio quality analysis does not apply.
+            If you detect any personal information (PII) or any sensitive information (e.g., credit card numbers, social security numbers, etc.), do not include it in the analysis and hide it in the JSON response (use [SENSITIVE] to hide it).
+
             Submit your answers and justifications in ${languageSelection}.
             
             Please provide your analysis in the following JSON format:
@@ -55,7 +60,12 @@ function getPrompt(language, checklist, transcription) {
                     "adequateQuality": boolean, // Whether the audio quality was adequate (true or false)
                     "justification": string      // Justification for the technical quality assessment
                 },
-                "checklistResults": {         // Results of the content checklist
+                "doChecklistResults": {         // Results of the content checklist
+                    "1": { property:string, "result": boolean, "justification": string }, // Property of the checklist, result and justification for each checklist item
+                    "2": { property:string, "result": boolean, "justification": string },
+                    // ...
+                },
+                "dontChecklistResults": {         // Results of the content checklist
                     "1": { property:string, "result": boolean, "justification": string }, // Property of the checklist, result and justification for each checklist item
                     "2": { property:string, "result": boolean, "justification": string },
                     // ...
@@ -68,12 +78,12 @@ function getPrompt(language, checklist, transcription) {
 }
 
 
-function getInstructions(language, checklist, transcription) {
+function getInstructions(language, doChecklist, dontChecklist, transcription) {
     if(language == "" || language == undefined || language == null) {
         language = "es";
     }
     const systemMessage = getSystemMessage();
-    const prompt = getPrompt(language, checklist, transcription);
+    const prompt = getPrompt(language, doChecklist, dontChecklist, transcription);
 
     return {prompt: prompt, systemMessage: systemMessage };
 }

@@ -87,12 +87,13 @@ async function getSignedUrl(fileId) {
 /**
  * Sends audio + checklist to Mistral model for analysis
  * @param {string} signedUrl - Signed URL for audio file
- * @param {string[]} checklist - Array of quality criteria
+ * @param {string[]} doChecklist - Array of quality criteria
+ * @param {string[]} dontChecklist - Array of quality criteria
  * @param {string} language - Language for analysis
  * @returns {Promise<Object>} - Analysis results
  */
-async function requestAnalysis(signedUrl, checklist, language) {
-  const instructions = getInstructions(language, checklist, null);
+async function requestAnalysis(signedUrl, doChecklist, dontChecklist, language) {
+  const instructions = getInstructions(language, doChecklist, dontChecklist, null);
   
   const payload = {
     model: CONFIG.MISTRAL_MODEL_AUDIO,
@@ -146,7 +147,8 @@ async function requestAnalysis(signedUrl, checklist, language) {
       metadata: {
         model: CONFIG.MISTRAL_MODEL_AUDIO,
         timestamp: new Date().toISOString(),
-        checklistItems: checklist.length
+        checklistItems: doChecklist.length,
+        dontChecklistItems: dontChecklist.length
       }
     };
   } catch (error) {
@@ -193,23 +195,23 @@ async function transcribeAudio(filePath) {
  * @param {string} language - Language for analysis
  * @returns {Promise<Object>} - Analysis results including transcription and analysis
  */
-async function analyzeWithTranscription(filePath, checklist, language) {
+async function analyzeWithTranscription(filePath, doChecklist, dontChecklist, language) {
   // Input validation
   if (!filePath || typeof filePath !== 'string') {
     throw new Error('Invalid file path: must be a non-empty string');
   }
 
-  if (!Array.isArray(checklist) || checklist.length === 0) {
+  if (!Array.isArray(doChecklist) || doChecklist.length === 0) {
     throw new Error('Checklist must be a non-empty array');
   }
 
-  if (!checklist.every(item => typeof item === 'string' && item.trim())) {
+  if (!doChecklist.every(item => typeof item === 'string' && item.trim())) {
     throw new Error('All checklist items must be non-empty strings');
   }
 
   try {
     const transcription = await transcribeAudio(filePath);
-    const instructions = getInstructions(language, checklist, transcription);
+    const instructions = getInstructions(language, doChecklist, dontChecklist, transcription);
 
     const payload = {
       model: CONFIG.MISTRAL_MODEL_TEXT,
@@ -249,7 +251,8 @@ async function analyzeWithTranscription(filePath, checklist, language) {
       metadata: {
         model: CONFIG.MISTRAL_MODEL_TEXT,
         timestamp: new Date().toISOString(),
-        checklistItems: checklist.length
+        checklistItems: doChecklist.length,
+        dontChecklistItems: dontChecklist.length
       }
     };
   } catch (error) {
@@ -261,15 +264,16 @@ async function analyzeWithTranscription(filePath, checklist, language) {
 /**
  * Complete audio analysis flow with Mistral
  * @param {string} filePath - Path to the audio file
- * @param {string[]} checklist - Array of quality criteria to check
+ * @param {string[]} doChecklist - Array of quality criteria to check
+ * @param {string[]} dontChecklist - Array of quality criteria to check
  * @param {string} language - Language for analysis
  * @returns {Promise<Object>} - Analysis results
  */
-async function analyzeDirectFromAudio(filePath, checklist, language) {
+async function analyzeDirectFromAudio(filePath, doChecklist, dontChecklist, language) {
   try {
     const fileId = await uploadAudio(filePath);
     const signedUrl = await getSignedUrl(fileId);
-    const analysis = await requestAnalysis(signedUrl, checklist, language);
+    const analysis = await requestAnalysis(signedUrl, doChecklist, dontChecklist, language);
     return analysis;
   } catch (error) {
     console.error('❌ Error in analysis flow:', error.message);

@@ -62,21 +62,22 @@ async function transcribeAudio(filePath) {
 /**
  * Analyzes audio content using GPT based on provided checklist
  * @param {string} filePath - Path to the audio file
- * @param {string[]} checklist - Array of quality criteria to check
+ * @param {string[]} doChecklist - Array of quality criteria to check
+ * @param {string[]} dontChecklist - Array of quality criteria to check
  * @param {string} [language='es'] - Language for analysis
  * @returns {Promise<Object>} - Analysis results including transcription and GPT analysis
  */
-async function analyzeWithGPT(filePath, checklist, language = 'es') {
+async function analyzeWithGPT(filePath, doChecklist, dontChecklist, language = 'es') {
   // Input validation
   if (!filePath || typeof filePath !== 'string') {
     throw new Error('Invalid file path: must be a non-empty string');
   }
 
-  if (!Array.isArray(checklist) || checklist.length === 0) {
+  if (!Array.isArray(doChecklist) || doChecklist.length === 0) {
     throw new Error('Checklist must be a non-empty array');
   }
 
-  if (!checklist.every(item => typeof item === 'string' && item.trim())) {
+  if (!doChecklist.every(item => typeof item === 'string' && item.trim())) {
     throw new Error('All checklist items must be non-empty strings');
   }
 
@@ -85,7 +86,7 @@ async function analyzeWithGPT(filePath, checklist, language = 'es') {
     const transcription = await transcribeAudio(filePath);
     
     // Get instructions for GPT analysis
-    const instructions = getInstructions(language, checklist, transcription);
+    const instructions = getInstructions(language, doChecklist, dontChecklist, transcription);
 
     // Perform GPT analysis
     const completion = await openai.chat.completions.create({
@@ -118,7 +119,8 @@ async function analyzeWithGPT(filePath, checklist, language = 'es') {
       metadata: {
         model: CONFIG.TEXT_MODEL,
         timestamp: new Date().toISOString(),
-        checklistItems: checklist.length
+        checklistItems: doChecklist.length,
+        dontChecklistItems: dontChecklist.length
       }
     };
   } catch (error) {
@@ -129,5 +131,5 @@ async function analyzeWithGPT(filePath, checklist, language = 'es') {
 
 module.exports = {
   transcribeAudio,
-  analyzeWithGPT: analyzeWithGPT // Updated function name for consistency
+  analyzeWithGPT // Updated function name for consistency
 };
