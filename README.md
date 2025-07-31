@@ -20,7 +20,7 @@ App en Node.js para analizar audios de conversaciones para distintas campañas (
 ## Características
 - Soporte para múltiples campañas, cada una con su propio checklist y audios.
 - **Dos modos de ejecución**: única (procesa y termina) o continua (vigila nuevos audios).
-- Transcribe audios usando distintos modelos (OpenAI con Whisper o Mistral con Voxtral)
+- Transcribe audios usando distintos modelos (OpenAI con Whisper, Mistral con Voxtral o cualquier modelo compatible con OpenAI SDK)
 - Analiza audios de detalle y justificación (seguimiento de un script predefinido de conversación, análisis emocional y del tono, calidad del audio, y resumen de cumplimiento)
 - Inserta los resultados de manera estructura en una base de datos para su posterior análisis. 
 - **Protección de datos**: No incluye información personal (PII) ni datos sensibles (como números de tarjetas de crédito, números de seguridad social, etc.) en el análisis y oculta esta información en la respuesta JSON (usa [SENSITIVE] para ocultarla).
@@ -202,7 +202,7 @@ Node.js app for analyzing conversation audio for various campaigns (such as supp
 ## Features
 - Support for multiple campaigns, each with its own checklist and audios.
 - **Two execution modes**: single run (processes and exits) or continuous (watches for new audios).
-- Transcribe audio using different models (OpenAI with Whisper or Mistral with Voxtral)
+- Transcribe audio using different models (OpenAI with Whisper, Mistral with Voxtral or any model compatible with OpenAI SDK)
 - Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary)
 - Inserts the results in a structured manner into a database for further analysis.
 - **Data protection**: Does not include personal information (PII) or sensitive data (e.g., credit card numbers, social security numbers, etc.) in the analysis and hides this information in the JSON response (use [SENSITIVE] to hide it).
