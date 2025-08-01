@@ -9,7 +9,8 @@ const config = {
   supabase: {
     url: process.env.SUPABASE_URL,
     key: process.env.SUPABASE_ANON_KEY,
-    tableName: process.env.SUPABASE_TABLE_NAME || 'audio_analysis_results'
+    resultsTableName: process.env.SUPABASE_RESULTS_TABLE_NAME || 'audio_analysis_results',
+    campaignsTableName: process.env.SUPABASE_CAMPAIGNS_TABLE_NAME || 'campaign'
   }
 };
 

@@ -60,6 +60,29 @@ class DatabaseManager {
   }
 
   /**
+   * Get all campaigns
+   */
+  async getAllCampaigns() {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    return await this.provider.getAllCampaigns();
+  }
+
+  /**
+   * Get campaign by folder name
+   * @param {string} campaignName - Folder of the campaign
+   */
+  async getCampaignByFolderName(campaignName) {
+    if (!this.isInitialized) {
+      await this.initialize();
+    }
+
+    return await this.provider.getCampaignByFolderName(campaignName);
+  }
+
+  /**
    * Close database connection
    */
   async close() {

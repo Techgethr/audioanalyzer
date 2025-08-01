@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const database = require('./services/database');
 
 const ROOT_DIR = path.resolve(__dirname, '..');
 const CAMPAIGNS_DIR = path.join(ROOT_DIR, 'campaigns');
@@ -9,39 +10,49 @@ function getCampaigns() {
   return fs.readdirSync(CAMPAIGNS_DIR).filter(f => fs.statSync(path.join(CAMPAIGNS_DIR, f)).isDirectory());
 }
 
-function getChecklist(campaignName) {
-  const checklistPath = path.join(CAMPAIGNS_DIR, campaignName, 'checklist.txt');
-  if (!fs.existsSync(checklistPath)) {
-    throw new Error(`No checklist.txt found for campaign ${campaignName}`);
-  }
-  const lines = fs.readFileSync(checklistPath, 'utf-8')
+async function getChecklist(campaignName) {
+  if(process.env.DB_ENGINE){
+    const campaign = await database.getCampaignByFolderName(campaignName);
+    if (!campaign) {
+      throw new Error(`No campaign found for campaign ${campaignName}`);
+    }
+    const language = campaign.language;
+    const doChecklist = campaign.do_items;
+    const dontChecklist = campaign.dont_items;
+    return { language, doChecklist, dontChecklist };
+  } else {
+    const checklistPath = path.join(CAMPAIGNS_DIR, campaignName, 'checklist.txt');
+    if (!fs.existsSync(checklistPath)) {
+      throw new Error(`No checklist.txt found for campaign ${campaignName}`);
+    }
+    const lines = fs.readFileSync(checklistPath, 'utf-8')
     .split('\n')
     .map(line => line.trim())
     .filter(Boolean);
 
-  const language = lines[0]; // Language
-  let currentSection = null;
-  const doChecklist = [];
-  const dontChecklist = [];
+    const language = lines[0]; // Language
+    let currentSection = null;
+    const doChecklist = [];
+    const dontChecklist = [];
 
-  for (let i = 1; i < lines.length; i++) {
-    const line = lines[i];
-    if (line.toUpperCase() === '# DO') {
-      currentSection = 'do';
-      continue;
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i];
+      if (line.toUpperCase() === '# DO') {
+        currentSection = 'do';
+        continue;
+      }
+      if (line.toUpperCase() === '# DONT') {
+        currentSection = 'dont';
+        continue;
+      }
+      if (currentSection === 'do') {
+        doChecklist.push(line);
+      } else if (currentSection === 'dont') {
+        dontChecklist.push(line);
+      }
     }
-    if (line.toUpperCase() === '# DONT') {
-      currentSection = 'dont';
-      continue;
-    }
-    if (currentSection === 'do') {
-      doChecklist.push(line);
-    } else if (currentSection === 'dont') {
-      dontChecklist.push(line);
-    }
+    return { language, doChecklist, dontChecklist };
   }
-
-  return { language, doChecklist, dontChecklist };
 }
 
 function getAudios(campaignName) {

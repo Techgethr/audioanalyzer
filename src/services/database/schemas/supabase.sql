@@ -24,6 +24,17 @@ CREATE TABLE IF NOT EXISTS audio_analysis_results (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS campaign (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    folder_name VARCHAR(255) NOT NULL,
+    language VARCHAR(10) NOT NULL,
+    do_items JSONB NOT NULL,
+    dont_items JSONB NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Optional: Add Row Level Security (RLS) if needed
 -- ALTER TABLE audio_analysis_results ENABLE ROW LEVEL SECURITY;
 

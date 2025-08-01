@@ -10,7 +10,8 @@ class SupabaseProvider extends BaseProvider {
   constructor() {
     super();
     this.client = null;
-    this.tableName = null;
+    this.resultsTableName = null;
+    this.campaignsTableName = null;
   }
 
   /**
@@ -22,11 +23,12 @@ class SupabaseProvider extends BaseProvider {
       const dbConfig = config.getConfig();
       
       this.client = createClient(dbConfig.url, dbConfig.key);
-      this.tableName = dbConfig.tableName;
+      this.resultsTableName = dbConfig.resultsTableName;
+      this.campaignsTableName = dbConfig.campaignsTableName;
       
       // Test connection by attempting to select from the table
       const { error } = await this.client
-        .from(this.tableName)
+        .from(this.resultsTableName)
         .select('id')
         .limit(1);
       
@@ -80,15 +82,13 @@ class SupabaseProvider extends BaseProvider {
       };
 
       const { data, error } = await this.client
-        .from(this.tableName)
+        .from(this.resultsTableName)
         .insert([record])
         .select();
 
       if (error) {
         throw error;
       }
-
-      console.log(`Result saved to Supabase for file: ${resultData.fileName}`);
       return data[0];
     } catch (error) {
       console.error('Failed to save result to Supabase:', error.message);
@@ -103,7 +103,7 @@ class SupabaseProvider extends BaseProvider {
   async getResultsByCampaign(campaignName) {
     try {
       const { data, error } = await this.client
-        .from(this.tableName)
+        .from(this.resultsTableName)
         .select('*')
         .eq('campaign_name', campaignName)
         .order('created_at', { ascending: false });
@@ -125,19 +125,42 @@ class SupabaseProvider extends BaseProvider {
   async getAllCampaigns() {
     try {
       const { data, error } = await this.client
-        .from(this.tableName)
-        .select('campaign_name')
-        .order('campaign_name');
+        .from(this.campaignsTableName)
+        .select('name')
+        .order('name');
 
       if (error) {
         throw error;
       }
 
       // Return unique campaign names
-      const uniqueCampaigns = [...new Set(data.map(row => row.campaign_name))];
+      const uniqueCampaigns = [...new Set(data.map(row => row.name))];
       return uniqueCampaigns;
     } catch (error) {
       console.error('Failed to get campaigns from Supabase:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Get campaign by folder name
+   * @param {string} campaignName - Folder of the campaign
+   */
+  async getCampaignByFolderName(campaignName) {
+    try {
+      const { data, error } = await this.client
+        .from(this.campaignsTableName)
+        .select('*')
+        .eq('folder_name', campaignName)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return data[0];
+    } catch (error) {
+      console.error('Failed to get campaign from Supabase:', error.message);
       throw error;
     }
   }

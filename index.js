@@ -39,7 +39,7 @@ async function runOnce(campaignArg) {
     let dontChecklist;
     let language;
     try {
-      const fullCheckList = getChecklist(campaignName);
+      const fullCheckList = await getChecklist(campaignName);
       language = fullCheckList.language;
       doChecklist = fullCheckList.doChecklist;
       dontChecklist = fullCheckList.dontChecklist;
@@ -114,7 +114,7 @@ function runWatcher(campaignArg) {
         }
         console.log(`\n-> New audio detected: ${file} in campaign ${campaignName}`);
         try {
-            const fullCheckList = getChecklist(campaignName);
+            const fullCheckList = await getChecklist(campaignName);
             const checklist = fullCheckList.checklist;
             const language = fullCheckList.language;
             await processAudioFile(campaignName, file, checklist,language);

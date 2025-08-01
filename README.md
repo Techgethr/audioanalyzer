@@ -8,7 +8,7 @@
 - [Database](#database)
 - [Usage Modes](#usage-modes)
 - [Error Handling](#error-handling)
-- [Example checklist.txt](#example-checklisttxt)
+- [Checklist](#checklist)
 - [Requirements](#requirements)
 - [AWS Lambda Usage with S3](#aws-lambda-usage-with-s3)
 - [Spanish Version](#spanish-version)
@@ -91,13 +91,14 @@ audioanalyzer/
      MISTRAL_INCLUDE_TRANSCRIPTION=true or false
      MISTRAL_MODEL_TEXT=
 
-     # If you want to use a database (otherwise, results are only saved in the text file)
+     # If you want to use a database (otherwise, if empty, results are only saved in the text file)
      DB_ENGINE=supabase
 
      # Supabase Configuration
      SUPABASE_URL=
      SUPABASE_ANON_KEY=
-     SUPABASE_TABLE_NAME=
+     SUPABASE_CAMPAIGN_TABLE_NAME=
+     SUPABASE_RESULTS_TABLE_NAME=
      ```
 
 ## Database
@@ -138,7 +139,11 @@ If an audio cannot be processed (due to network error, API error, etc.), the sys
 - The script continues processing other audios without interruption.
 This allows safe re-execution at any time to process pending audios.
 
-## Example checklist.txt
+## Checklist
+If DB_ENGINE is empty, the checklist.txt will be used to check the do and do not lists to analyze the audio.
+
+If DB_ENGINE is not empty, the checklist needs to be in the database (_campaign_ table).
+
 ```
 es
 # DO
@@ -151,7 +156,7 @@ Polite farewell
 Ask for password
 ```
 
-**The first line of the checklist should indicate the language for the analysis (es or en)**
+**The first line of the checklist (if using checklist.txt) should indicate the language for the analysis (es or en)**
 
 ## Requirements
 - Node.js >= 16
@@ -191,7 +196,7 @@ This project can now run as a Lambda function, automatically processing audio fi
 - [Base de datos](#base-de-datos)
 - [Modos de Uso](#modos-de-uso)
 - [Manejo de Errores](#manejo-de-errores)
-- [Ejemplo de checklist.txt](#ejemplo-de-checklisttxt)
+- [Checklist](#checklist)
 - [Requisitos](#requisitos)
 - [Uso como AWS Lambda con S3](#uso-como-aws-lambda-con-s3)
 - [English Version](#english-version)
@@ -280,7 +285,8 @@ audioanalyzer/
      # Supabase Configuration
      SUPABASE_URL=
      SUPABASE_ANON_KEY=
-     SUPABASE_TABLE_NAME=
+     SUPABASE_CAMPAIGN_TABLE_NAME=
+     SUPABASE_RESULTS_TABLE_NAME=
      ```
 
 ## Base de datos
@@ -321,7 +327,11 @@ Si un audio no se puede procesar (por un error de red, de la API, etc.), el sist
 - El script continúa procesando los demás audios sin interrupción.
 Esto permite una re-ejecución segura en cualquier momento para procesar los audios que quedaron pendientes.
 
-## Ejemplo de checklist.txt
+## Checklist
+Si DB_ENGINE está vacío, el checklist.txt se usará para verificar la lista de hacer y no hacer para analizar el audio.
+
+Si DB_ENGINE no está vacío, el checklist se debe guardar en la base de datos (tabla _campaign_).
+
 ```
 es
 # DO
@@ -334,7 +344,7 @@ Despedida cordial
 Preguntar sobre cuál es la contraseña al usuario
 ```
 
-**La primera línea del checklist debe indicar el idioma para el análisis (es o en)**
+**La primera línea del checklist (si es usando checklist.txt) debe indicar el idioma para el análisis (es o en)**
 
 ## Requisitos
 - Node.js >= 16

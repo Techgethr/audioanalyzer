@@ -51,6 +51,14 @@ class BaseProvider {
       throw new Error(`Missing required fields: ${missing.join(', ')}`);
     }
   }
+
+  /**
+   * Get campaign by folder name
+   * @param {string} campaignName - Folder name of the campaign
+   */
+  async getCampaignByFolderName(campaignName) {
+    throw new Error('getCampaignByFolderName() method must be implemented by provider');
+  }
 }
 
 module.exports = BaseProvider;
