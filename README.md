@@ -144,6 +144,8 @@ If DB_ENGINE is empty, the checklist.txt will be used to check the do and do not
 
 If DB_ENGINE is not empty, the checklist needs to be in the database (_campaign_ table).
 
+Checklist.txt format:
+
 ```
 es
 # DO
@@ -331,6 +333,8 @@ Esto permite una re-ejecución segura en cualquier momento para procesar los aud
 Si DB_ENGINE está vacío, el checklist.txt se usará para verificar la lista de hacer y no hacer para analizar el audio.
 
 Si DB_ENGINE no está vacío, el checklist se debe guardar en la base de datos (tabla _campaign_).
+
+Formato de checklist.txt:
 
 ```
 es
