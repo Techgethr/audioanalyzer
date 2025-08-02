@@ -14,31 +14,31 @@ function getSystemMessage() {
 
 function getLanguage(language) {
     var languageSelection = "";
-    if(languageSelection == "en") {
+    if(language == "en") {
         languageSelection = "English";
     }
-    if(languageSelection == "es") {
+    if(language == "es") {
         languageSelection = "Spanish";
     }
-    if(languageSelection == "fr") {
+    if(language == "fr") {
         languageSelection = "French";
     }
-    if(languageSelection == "pt") {
+    if(language == "pt") {
         languageSelection = "Portuguese";
     }
-    if(languageSelection == "de") {
+    if(language == "de") {
         languageSelection = "German";
     }
-    if(languageSelection == "it") {
+    if(language == "it") {
         languageSelection = "Italian";
     }
-    if(languageSelection == "nl") {
+    if(language == "nl") {
         languageSelection = "Dutch";
     }
-    if(languageSelection == "hi") {
+    if(language == "hi") {
         languageSelection = "Hindi";
     }
-    if(languageSelection == "") {
+    if(language == "") {
         throw new Error("Invalid language");
     }
     return languageSelection;
