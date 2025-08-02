@@ -24,6 +24,7 @@ Node.js app for analyzing conversation audio for various campaigns (such as supp
 - Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary)
 - Inserts the results in a structured manner into a database for further analysis.
 - **Data protection**: Does not include personal information (PII) or sensitive data (e.g., credit card numbers, social security numbers, etc.) in the analysis and hides this information in the JSON response (use [SENSITIVE] to hide it).
+- **Language support**: Supports multiple languages (Spanish, English, French, Portuguese, German, Italian, Dutch, Hindi).
 - **Failure recovery**: Moves problematic audios to a `failed` folder for manual review, without stopping the process.
 - Modular and scalable structure.
 
@@ -144,6 +145,16 @@ If DB_ENGINE is empty, the checklist.txt will be used to check the do and do not
 
 If DB_ENGINE is not empty, the checklist needs to be in the database (_campaign_ table).
 
+To select the language, use the following codes:
+- _es_ for Spanish
+- _en_ for English
+- _fr_ for French
+- _pt_ for Portuguese
+- _de_ for German
+- _it_ for Italian
+- _nl_ for Dutch
+- _hi_ for Hindi
+
 Checklist.txt format:
 
 ```
@@ -158,7 +169,7 @@ Polite farewell
 Ask for password
 ```
 
-**The first line of the checklist (if using checklist.txt) should indicate the language for the analysis (es or en)**
+**The first line of the checklist (if using checklist.txt) should indicate the language for the analysis (es, en, fr, pt, de, it, nl, hi)**
 
 ## Requirements
 - Node.js >= 16
@@ -214,6 +225,7 @@ App en Node.js para analizar audios de conversaciones para distintas campañas (
 - Analiza audios de detalle y justificación (seguimiento de un script predefinido de conversación, análisis emocional y del tono, calidad del audio, y resumen de cumplimiento)
 - Inserta los resultados de manera estructura en una base de datos para su posterior análisis. 
 - **Protección de datos**: No incluye información personal (PII) ni datos sensibles (como números de tarjetas de crédito, números de seguridad social, etc.) en el análisis y oculta esta información en la respuesta JSON (usa [SENSITIVE] para ocultarla).
+- **Soporte de idiomas**: Soporta múltiples idiomas (Espanol, Inglés, Francés, Portugués, Aleman, Italiano, Holandés, Hindi).
 - **Recuperación ante fallos**: Mueve los audios problemáticos a una carpeta `failed` para revisión manual, sin detener el proceso.
 - Estructura modular y escalable.
 
@@ -334,6 +346,16 @@ Si DB_ENGINE está vacío, el checklist.txt se usará para verificar la lista de
 
 Si DB_ENGINE no está vacío, el checklist se debe guardar en la base de datos (tabla _campaign_).
 
+Para seleccionar el idioma, use el siguiente código:
+- _es_ para Español
+- _en_ para Inglés
+- _fr_ para Francés
+- _pt_ para Portugués
+- _de_ para Aleman
+- _it_ para Italiano
+- _nl_ para Holandés
+- _hi_ para Hindi
+
 Formato de checklist.txt:
 
 ```
@@ -348,7 +370,7 @@ Despedida cordial
 Preguntar sobre cuál es la contraseña al usuario
 ```
 
-**La primera línea del checklist (si es usando checklist.txt) debe indicar el idioma para el análisis (es o en)**
+**La primera línea del checklist (si es usando checklist.txt) debe indicar el idioma para el análisis (es, en, fr, pt, de, it, nl, hi)**
 
 ## Requisitos
 - Node.js >= 16

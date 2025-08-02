@@ -12,9 +12,41 @@ function getSystemMessage() {
     return systemMessage;
 }
 
+function getLanguage(language) {
+    var languageSelection = "";
+    if(languageSelection == "en") {
+        languageSelection = "English";
+    }
+    if(languageSelection == "es") {
+        languageSelection = "Spanish";
+    }
+    if(languageSelection == "fr") {
+        languageSelection = "French";
+    }
+    if(languageSelection == "pt") {
+        languageSelection = "Portuguese";
+    }
+    if(languageSelection == "de") {
+        languageSelection = "German";
+    }
+    if(languageSelection == "it") {
+        languageSelection = "Italian";
+    }
+    if(languageSelection == "nl") {
+        languageSelection = "Dutch";
+    }
+    if(languageSelection == "hi") {
+        languageSelection = "Hindi";
+    }
+    if(languageSelection == "") {
+        throw new Error("Invalid language");
+    }
+    return languageSelection;
+}
+
 function getPrompt(language, doChecklist, dontChecklist, transcription) {
     const includeTranscription = transcription && transcription.trim() != "" && transcription != undefined && transcription != null;
-    var languageSelection = language == "es" ? "Spanish" : "English";
+    var languageSelection = getLanguage(language);
     var promptStart = includeTranscription ? `Given the following call transcript: "${transcription} of a conversation"`: "Given this call audio of a conversation";
     
     var prompt = `${promptStart}, and the following checklist of content that should be present in the conversation:
