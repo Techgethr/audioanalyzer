@@ -11,7 +11,7 @@
 - [Checklist](#checklist)
 - [Requirements](#requirements)
 - [AWS Lambda Usage with S3](#aws-lambda-usage-with-s3)
-- [To Do](#todo)
+- [To Do](#to-do)
 - [Spanish Version](#spanish-version)
 
 # Description
@@ -227,7 +227,7 @@ This project can now run as a Lambda function, automatically processing audio fi
 - [Checklist](#checklist)
 - [Requisitos](#requisitos)
 - [Uso como AWS Lambda con S3](#uso-como-aws-lambda-con-s3)
-- [To Do](#to-do)
+- [Por hacer](#por-hacer)
 - [English Version](#english-version)
 
 # Descripción
