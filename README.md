@@ -416,7 +416,7 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 - El procesamiento y guardado de resultados ahora es completamente en S3 y `/tmp` (directorio temporal de Lambda).
 - El modo watcher y procesamiento local siguen disponibles para uso fuera de Lambda.
 
-## To Do
+## Por hacer
 - [ ] Anonimización automática de datos sensibles (PII, tarjetas de crédito, etc.).
 - [ ] Integración con proveedores de nube (Azure, AWS, Google Cloud, y otros).
 - [ ] Aplicación web para gestionar campañas y resultados.
