@@ -11,6 +11,7 @@
 - [Checklist](#checklist)
 - [Requirements](#requirements)
 - [AWS Lambda Usage with S3](#aws-lambda-usage-with-s3)
+- [To Do](#todo)
 - [Spanish Version](#spanish-version)
 
 # Description
@@ -199,6 +200,20 @@ This project can now run as a Lambda function, automatically processing audio fi
 - Processing and saving results is now fully in S3 and `/tmp` (Lambda's temp directory).
 - Watcher mode and local processing remain available for use outside Lambda.
 
+## To Do
+- [ ] Automatic anonymization of sensitive data (PII, credit cards, etc.).
+- [ ] Integration with Cloud providers (Azure, AWS, Google Cloud, and others).
+- [ ] Web app to manage campaigns, and results.
+- [ ] Dashboard with interactive visualizations of the analyses.
+- [ ] Batch processing
+- [ ] REST API so that other systems can use the analysis.
+- [ ] Administration panel for user management and billing.
+- [ ] Product usage analytics.
+- [ ] Customization of analysis according to the sector (education, healthcare, call centers, etc.).
+- [ ] Identification of best practices and model agents.
+- [ ] Integration with CRMs and ticketing systems (Salesforce, Zendesk, HubSpot).
+- [ ] Automatic alerts to supervisors in case of critical situations (upset customer, potential termination, etc.).
+
 # Spanish Version
 
 ## Índice
@@ -212,6 +227,7 @@ This project can now run as a Lambda function, automatically processing audio fi
 - [Checklist](#checklist)
 - [Requisitos](#requisitos)
 - [Uso como AWS Lambda con S3](#uso-como-aws-lambda-con-s3)
+- [To Do](#to-do)
 - [English Version](#english-version)
 
 # Descripción
@@ -400,3 +416,16 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 - El procesamiento y guardado de resultados ahora es completamente en S3 y `/tmp` (directorio temporal de Lambda).
 - El modo watcher y procesamiento local siguen disponibles para uso fuera de Lambda.
 
+## To Do
+- [ ] Anonimización automática de datos sensibles (PII, tarjetas de crédito, etc.).
+- [ ] Integración con proveedores de nube (Azure, AWS, Google Cloud, y otros).
+- [ ] Aplicación web para gestionar campañas y resultados.
+- [ ] Dashboard con visualizaciones interactivas de los análisis.
+- [ ] Procesamiento por lotes
+- [ ] REST API para que otros sistemas puedan usar el análisis.
+- [ ] Panel de administración para gestión de usuarios y facturación.
+- [ ] Análisis de uso del producto.
+- [ ] Personalización del análisis según el sector ( educación, salud, centros de llamadas, etc.).
+- [ ] Identificación de las mejores prácticas y agentes modelo.
+- [ ] Integración con CRMs y sistemas de tickets (Salesforce, Zendesk, HubSpot).
+- [ ] Alertas automáticas a supervisores en situaciones críticas (cliente enfadado, terminación potencial, etc.).
