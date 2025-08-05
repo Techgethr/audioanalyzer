@@ -202,6 +202,8 @@ This project can now run as a Lambda function, automatically processing audio fi
 
 ## To Do
 - [ ] Automatic anonymization of sensitive data (PII, credit cards, etc.).
+- [ ] Integration with more database engines.
+- [ ] Integration with more AI engines.
 - [ ] Integration with Cloud providers (Azure, AWS, Google Cloud, and others).
 - [ ] Web app to manage campaigns, and results.
 - [ ] Dashboard with interactive visualizations of the analyses.
@@ -418,6 +420,8 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 
 ## Por hacer
 - [ ] Anonimización automática de datos sensibles (PII, tarjetas de crédito, etc.).
+- [ ] Integración con más motores de bases de datos.
+- [ ] Integración con más motores de IA.
 - [ ] Integración con proveedores de nube (Azure, AWS, Google Cloud, y otros).
 - [ ] Aplicación web para gestionar campañas y resultados.
 - [ ] Dashboard con visualizaciones interactivas de los análisis.
