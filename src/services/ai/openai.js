@@ -61,16 +61,16 @@ async function transcribeAudio(filePath) {
 
 /**
  * Analyzes audio content using GPT based on provided checklist
- * @param {string} filePath - Path to the audio file
+ * @param {string} transcription - Transcribed text
  * @param {string[]} doChecklist - Array of quality criteria to check
  * @param {string[]} dontChecklist - Array of quality criteria to check
  * @param {string} [language='es'] - Language for analysis
  * @returns {Promise<Object>} - Analysis results including transcription and GPT analysis
  */
-async function analyzeWithGPT(filePath, doChecklist, dontChecklist, language = 'es') {
+async function analyzeWithGPT(transcription, doChecklist, dontChecklist, language = 'es') {
   // Input validation
-  if (!filePath || typeof filePath !== 'string') {
-    throw new Error('Invalid file path: must be a non-empty string');
+  if (!transcription || typeof transcription !== 'string') {
+    throw new Error('Invalid transcription: must be a non-empty string');
   }
 
   if (!Array.isArray(doChecklist) || doChecklist.length === 0) {
@@ -82,8 +82,6 @@ async function analyzeWithGPT(filePath, doChecklist, dontChecklist, language = '
   }
 
   try {
-    // Transcribe the audio
-    const transcription = await transcribeAudio(filePath);
     
     // Get instructions for GPT analysis
     const instructions = getInstructions(language, doChecklist, dontChecklist, transcription);

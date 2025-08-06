@@ -1,6 +1,7 @@
 # Sonaly
 
 ## Index
+- [Demo](#demo)
 - [Description](#description)
 - [Features](#features)
 - [Project Structure](#project-structure)
@@ -14,9 +15,13 @@
 - [To Do](#to-do)
 - [Spanish Version](#spanish-version)
 
+## Demo
+
+Check how works in this [YouTube](https://youtu.be/ySX8JlW-0g8) video.
+
 # Description
 
-Node.js app for analyzing conversation audio for various campaigns (such as support, sales, etc.) and verifying whether it meets defined requirements, such as script tracking (checklist), comments or phrases that should not be used, tone, audio quality, and more, using analytics and AI services.
+App for analyzing conversation audio for various campaigns (such as support, sales, etc.) and verifying whether it meets defined requirements, such as script tracking (checklist), comments or phrases that should not be used, tone, audio quality, and more, using analytics and AI services.
 
 ## Features
 - Support for multiple campaigns, each with its own checklist and audios.
@@ -234,7 +239,7 @@ This project can now run as a Lambda function, automatically processing audio fi
 
 # Descripción
 
-App en Node.js para analizar audios de conversaciones para distintas campañas (como soporte, ventas, etc.) y verificar si cumplen con requisitos definidos, como seguimiento de scripts (checklist), comentarios o frases que no deben ser usadas, emocional, tono, calidad del audio, y mucho más, usando análisis y servicios de AI. 
+App para analizar audios de conversaciones para distintas campañas (como soporte, ventas, etc.) y verificar si cumplen con requisitos definidos, como seguimiento de scripts (checklist), comentarios o frases que no deben ser usadas, emocional, tono, calidad del audio, y mucho más, usando análisis y servicios de AI. 
 
 ## Características
 - Soporte para múltiples campañas, cada una con su propio checklist y audios.

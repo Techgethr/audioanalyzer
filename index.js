@@ -2,7 +2,7 @@ require('dotenv').config();
 const path = require('path');
 const chokidar = require('chokidar');
 const { getCampaigns, getChecklist, getAudios, getAudioPath } = require('./src/campaignManager');
-const { analyzeAudio } = require('./src/services/ai/index');
+const { analyzeAudio } = require('./src/aiAnalysisManager');
 const { saveResult, moveAudioToProcessed, handleFailedAudio } = require('./src/resultWriter');
 const fs = require('fs');
 const AWS = require('aws-sdk');
