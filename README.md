@@ -44,12 +44,15 @@ App for analyzing conversation audio for various campaigns (such as support, sal
 audioanalyzer/
 ├── index.js
 ├── src/
+│   ├── aiAnalysisManager.js
 │   ├── campaignManager.js
 │   ├── promptManager.js
 │   ├── resultWriter.js
 │   └── services
 │       └── ai
+│       └── analyzer
 │       └── database
+│       └── transcriber
 ├── package.json
 ├── .env
 ├── README.md
@@ -264,12 +267,15 @@ App para analizar audios de conversaciones para distintas campañas (como soport
 audioanalyzer/
 ├── index.js
 ├── src/
+│   ├── aiAnalysisManager.js
 │   ├── campaignManager.js
 │   ├── promptManager.js
 │   ├── resultWriter.js
 │   └── services
 │       └── ai
+│       └── analyzer
 │       └── database
+│       └── transcriber
 ├── package.json
 ├── .env
 ├── README.md
