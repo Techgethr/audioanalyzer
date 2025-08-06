@@ -17,7 +17,10 @@
 
 ## Demo
 
-Check how works in this [YouTube](https://youtu.be/ySX8JlW-0g8) video.
+Check how works in this demo: [YouTube](https://youtu.be/ySX8JlW-0g8).
+
+[![Demo](https://img.youtube.com/vi/ySX8JlW-0g8/0.jpg)](https://youtu.be/ySX8JlW-0g8)
+
 
 # Description
 
@@ -26,8 +29,9 @@ App for analyzing conversation audio for various campaigns (such as support, sal
 ## Features
 - Support for multiple campaigns, each with its own checklist and audios.
 - **Two execution modes**: single run (processes and exits) or continuous (watches for new audios).
-- Transcribe audio using different models (OpenAI with Whisper, Mistral with Voxtral or any model compatible with OpenAI SDK)
-- Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary)
+- Transcribe audio using different models (OpenAI Whisper, Mistral Voxtral or any model compatible with OpenAI SDK)
+- Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary).
+- Process using different AI models or services (for example: use OpenAI Whisper for transcription and Mistral for analysis).
 - Inserts the results in a structured manner into a database for further analysis.
 - **Data protection**: Does not include personal information (PII) or sensitive data (e.g., credit card numbers, social security numbers, etc.) in the analysis and hides this information in the JSON response (use [SENSITIVE] to hide it).
 - **Language support**: Supports multiple languages (Spanish, English, French, Portuguese, German, Italian, Dutch, Hindi).
@@ -78,25 +82,23 @@ audioanalyzer/
 2. **Set up your keys:**
    - Create a `.env` file with the following content:
      ```
-     AI_SERVICE=openai or voxtral
+     AI_TRANSCRIBER_SERVICE=openai or mistral
+     AI_ANALYZER_SERVICE=openai or mistral
 
      # If OpenAI is used
      OPENAI_API_KEY=tu_api_key_aqui
      OPENAI_BASE_URL= (if nothing it will use the default from OpenAI)
      OPENAI_MODEL=
 
-     # If Whisper is used
+     # If Whisper is used (in other service than OpenAI)
      WHISPER_BASE_URL= (if nothing it will use the default from OpenAI)
      WHISPER_MODEL=whisper-1
      WHISPER_API_KEY= (it could be the same as OPENAI_API_KEY)
 
-     # IF Voxtral is used
+     # IF Mistral is used
      MISTRAL_API_KEY=tu_mistral_api_key
-     MISTRAL_MODEL_AUDIO=voxtral_model
+     MISTRAL_MODEL=voxtral_model
      MISTRAL_ENDPOINT=https://api.mistral.ai/v1
-     # If you want to transcribe before analyzing with Mistral, configure the following variables
-     MISTRAL_INCLUDE_TRANSCRIPTION=true or false
-     MISTRAL_MODEL_TEXT=
 
      # If you want to use a database (otherwise, if empty, results are only saved in the text file)
      DB_ENGINE=supabase
@@ -181,6 +183,7 @@ Ask for password
 - Node.js >= 16
 - OpenAI account and API Key with access to Whisper and GPT
 - Or Mistral account and API Key to use Voxtral to analyze the audio instead of OpenAI.
+- Or any OpenAI compatible API to use as transcriber and analyzer.
 
 ## AWS Lambda Usage with S3
 
@@ -206,6 +209,7 @@ This project can now run as a Lambda function, automatically processing audio fi
 - Watcher mode and local processing remain available for use outside Lambda.
 
 ## To Do
+- [x] Decoupling of AI services between transcriber and analyzer.
 - [ ] Automatic anonymization of sensitive data (PII, credit cards, etc.).
 - [ ] Integration with more database engines.
 - [ ] Integration with more AI engines.
@@ -246,6 +250,7 @@ App para analizar audios de conversaciones para distintas campañas (como soport
 - **Dos modos de ejecución**: única (procesa y termina) o continua (vigila nuevos audios).
 - Transcribe audios usando distintos modelos (OpenAI con Whisper, Mistral con Voxtral o cualquier modelo compatible con OpenAI SDK)
 - Analiza audios de detalle y justificación (seguimiento de un script predefinido de conversación, análisis emocional y del tono, calidad del audio, y resumen de cumplimiento)
+- Procesa usando diferentes modelos o servicios de AI (por ejemplo OpenAI para transcripción y Mistral para análisis).
 - Inserta los resultados de manera estructura en una base de datos para su posterior análisis. 
 - **Protección de datos**: No incluye información personal (PII) ni datos sensibles (como números de tarjetas de crédito, números de seguridad social, etc.) en el análisis y oculta esta información en la respuesta JSON (usa [SENSITIVE] para ocultarla).
 - **Soporte de idiomas**: Soporta múltiples idiomas (Espanol, Inglés, Francés, Portugués, Aleman, Italiano, Holandés, Hindi).
@@ -296,25 +301,23 @@ audioanalyzer/
 2. **Configura tus claves:**
    - Crea un archivo `.env` con el siguiente contenido:
      ```
-     AI_SERVICE=openai o voxtral
+     AI_TRANSCRIBER_SERVICE=openai o mistral
+     AI_ANALYZER_SERVICE=openai o mistral
 
-     # Si usas OpenAI para transcripción
+     # Si usas OpenAI
      OPENAI_API_KEY=tu_api_key_aqui
      OPENAI_BASE_URL= (si nada, usará el default)
      OPENAI_MODEL=
 
-     # Si usas Whisper para análisis
+     # Si usas Whisper para análisis (en otro servicio que no sea OpenAI)
      WHISPER_BASE_URL= (si nada, usará el default de OpenAI)
      WHISPER_MODEL=whisper-1
      WHISPER_API_KEY= (podría ser la misma que OPENAI_API_KEY)
 
-     # Si usas Voxtral
+     # Si usas Mistral
      MISTRAL_API_KEY=tu_mistral_api_key
-     MISTRAL_MODEL_AUDIO=voxtral_model
+     MISTRAL_MODEL=voxtral_model
      MISTRAL_ENDPOINT=https://api.mistral.ai/v1
-     # Si quieres hacer transcripción previamente al análisis con Mistral, configura las siguientes variables
-     MISTRAL_INCLUDE_TRANSCRIPTION=true or false
-     MISTRAL_MODEL_TEXT=
 
      # Si usas base de datos (sino, solo se guardan los resultados en el archivo de texto)
      DB_ENGINE=supabase
@@ -424,6 +427,7 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 - El modo watcher y procesamiento local siguen disponibles para uso fuera de Lambda.
 
 ## Por hacer
+- [x] Desacoplamiento de servicios AI entre transcriber y analyzer.
 - [ ] Anonimización automática de datos sensibles (PII, tarjetas de crédito, etc.).
 - [ ] Integración con más motores de bases de datos.
 - [ ] Integración con más motores de IA.
