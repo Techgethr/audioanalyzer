@@ -197,12 +197,13 @@ This project can now run as a Lambda function, automatically processing audio fi
 ### Deployment Steps:
 1. Package the code (including `node_modules`) into a zip file.
 2. Upload the zip as a Lambda function.
-3. Set the environment variable `OPENAI_API_KEY` and models if needed.
-4. Create an S3 trigger for the Lambda function:
+3. Set the environment variable `AI_TRANSCRIBER_SERVICE` and `AI_ANALYZER_SERVICE` to `openai` or `mistral`.
+4. Set the environment variable `OPENAI_API_KEY` or `MISTRAL_API_KEY` and other variables needed for the service.
+5. Create an S3 trigger for the Lambda function:
    - Event: `PUT`
    - Prefix: `campaigns/`
    - Suffix: (empty or restricted to audio extensions)
-5. Ensure the Lambda has permissions to read and write to the S3 bucket.
+6. Ensure the Lambda has permissions to read and write to the S3 bucket.
 
 ### Notes
 - Processing and saving results is now fully in S3 and `/tmp` (Lambda's temp directory).
@@ -415,12 +416,13 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 ### Pasos para desplegar:
 1. Empaqueta el código (incluyendo `node_modules`) en un zip.
 2. Sube el zip como función Lambda.
-3. Configura las variables de entorno y los modelos si es necesario.
-4. Crea un trigger de tipo S3 para la función Lambda:
+3. Configura las variables de entorno `AI_TRANSCRIBER_SERVICE` and `AI_ANALYZER_SERVICE` a `openai` `mistral`.
+4. Configura las variables de entorno `OPENAI_API_KEY` o `MISTRAL_API_KEY` y otras variables necesarias para el servicio.
+5. Crea un trigger de tipo S3 para la función Lambda:
    - Evento: `PUT`
    - Prefijo: `campaigns/`
    - Sufijo: (vacío o restringido a extensiones de audio)
-5. Asegúrate de que la Lambda tenga permisos para leer y escribir en el bucket S3.
+6. Asegúrate de que la Lambda tenga permisos para leer y escribir en el bucket S3.
 
 ### Notas
 - El procesamiento y guardado de resultados ahora es completamente en S3 y `/tmp` (directorio temporal de Lambda).
