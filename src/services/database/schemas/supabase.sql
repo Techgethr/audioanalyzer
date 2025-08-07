@@ -4,6 +4,7 @@
 CREATE TABLE IF NOT EXISTS audio_analysis_results (
     id BIGSERIAL PRIMARY KEY,
     campaign_name VARCHAR(255) NOT NULL,
+    campaign_id UUID NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     transcription TEXT NULL,
     compliance_score INT NOT NULL,
@@ -21,7 +22,8 @@ CREATE TABLE IF NOT EXISTS audio_analysis_results (
     strengths JSONB NULL,
     improvement_areas JSONB NULL,
     processed_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    FOREIGN KEY (campaign_id) REFERENCES campaign(id)
 );
 
 CREATE TABLE IF NOT EXISTS campaign (

@@ -18,7 +18,8 @@ This module provides a scalable database integration for saving audio analysis r
    DB_ENGINE=supabase
    SUPABASE_URL=https://your-project.supabase.co
    SUPABASE_ANON_KEY=your-anon-key
-   SUPABASE_TABLE_NAME=audio_analysis_results
+   SUPABASE_RESULTS_TABLE_NAME=audio_analysis_results
+   SUPABASE_CAMPAIGNS_TABLE_NAME=campaign
    ```
 
 ## Usage
@@ -31,9 +32,21 @@ The database integration automatically saves results when `saveResult` is called
 
 ### Supabase Table Structure
 ```sql
+CREATE TABLE IF NOT EXISTS campaign (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name VARCHAR(255) NOT NULL,
+    description TEXT,
+    folder_name VARCHAR(255) NOT NULL,
+    language VARCHAR(10) NOT NULL,
+    do_items JSONB NOT NULL,
+    dont_items JSONB NOT NULL,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS audio_analysis_results (
     id BIGSERIAL PRIMARY KEY,
     campaign_name VARCHAR(255) NOT NULL,
+    campaign_id UUID NOT NULL,
     file_name VARCHAR(255) NOT NULL,
     transcription TEXT NULL,
     compliance_score INT NOT NULL,
@@ -46,11 +59,13 @@ CREATE TABLE IF NOT EXISTS audio_analysis_results (
     communication_tone_justification TEXT NULL,
     technical_quality_adequate BOOLEAN NULL,
     technical_quality_justification TEXT NULL,
-    checklist_results JSONB NULL,
+    do_checklist_results JSONB NULL,
+    dont_checklist_results JSONB NULL,
     strengths JSONB NULL,
     improvement_areas JSONB NULL,
     processed_at TIMESTAMPTZ NOT NULL,
-    created_at TIMESTAMPTZ DEFAULT NOW()
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    FOREIGN KEY (campaign_id) REFERENCES campaign(id)
 );
 ```
 
@@ -61,7 +76,8 @@ CREATE TABLE IF NOT EXISTS audio_analysis_results (
 | `DB_ENGINE` | Database engine to use | `supabase` |
 | `SUPABASE_URL` | Supabase project URL | - |
 | `SUPABASE_ANON_KEY` | Supabase anon key | - |
-| `SUPABASE_TABLE_NAME` | Supabase table name | `audio_analysis_results` |
+| `SUPABASE_RESULTS_TABLE_NAME` | Supabase results table name | `audio_analysis_results` |
+| `SUPABASE_CAMPAIGNS_TABLE_NAME` | Supabase campaigns table name | `campaign` |
 
 ## Testing
 
@@ -83,5 +99,5 @@ To add a new database engine:
 
 1. Create a new provider in `providers/` directory
 2. Extend the `BaseProvider` class
-3. Implement required methods: `connect()`, `disconnect()`, `saveResult()`, `getResultsByCampaign()`
+3. Implement required methods: `connect()`, `disconnect()`, `saveResult()`, `getResultsByCampaign()`, `getCampaignByFolderName()`
 4. Update the database manager in `index.js` to include your new provider

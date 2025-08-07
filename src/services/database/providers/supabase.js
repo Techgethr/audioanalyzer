@@ -61,6 +61,7 @@ class SupabaseProvider extends BaseProvider {
       
       const record = {
         campaign_name: resultData.campaignName,
+        campaign_id: resultData.campaignId,
         file_name: resultData.fileName,
         transcription: resultData.transcription,
         compliance_score: resultData.complianceScore,

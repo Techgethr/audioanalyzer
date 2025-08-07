@@ -35,8 +35,10 @@ async function saveResult(campaignName, file, transcription, results) {
   } else {
     // Save to database
   try {
+    const campaign = await database.getCampaignByFolderName(campaignName);
     const resultData = {
-        campaignName,
+        campaignName: campaignName,
+        campaignId: campaign.id,
         fileName: file,
         transcription: transcription || null,
         complianceScore: results.complianceScore || 0,
