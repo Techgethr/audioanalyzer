@@ -101,7 +101,9 @@ audioanalyzer/
 
      # IF Mistral is used
      MISTRAL_API_KEY=tu_mistral_api_key
-     MISTRAL_MODEL=voxtral_model
+     MISTRAL_AUDIO_MODEL=voxtral_model
+     # The text model is used for anonymizing the transcription
+     MISTRAL_TEXT_MODEL=mistral-model
      MISTRAL_ENDPOINT=https://api.mistral.ai/v1
 
      # If you want to use a database (otherwise, if empty, results are only saved in the text file)
@@ -326,7 +328,9 @@ audioanalyzer/
 
      # Si usas Mistral
      MISTRAL_API_KEY=tu_mistral_api_key
-     MISTRAL_MODEL=voxtral_model
+     MISTRAL_AUDIO_MODEL=voxtral_model
+     # El modelo de texto se usa para anonimizar la transcripción
+     MISTRAL_TEXT_MODEL=mistral-model
      MISTRAL_ENDPOINT=https://api.mistral.ai/v1
 
      # Si usas base de datos (sino, solo se guardan los resultados en el archivo de texto)
