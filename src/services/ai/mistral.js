@@ -7,7 +7,8 @@ require('dotenv').config();
 const CONFIG = {
   MISTRAL_API_KEY: process.env.MISTRAL_API_KEY,
   MISTRAL_ENDPOINT: process.env.MISTRAL_ENDPOINT,
-  MISTRAL_MODEL_AUDIO: process.env.MISTRAL_MODEL || 'voxtral-mini-latest',
+  MISTRAL_MODEL_AUDIO: process.env.MISTRAL_AUDIO_MODEL || 'voxtral-mini-latest',
+  MISTRAL_MODEL_TEXT: process.env.MISTRAL_TEXT_MODEL || 'mistral-mini-latest',
   MAX_FILE_SIZE: 25 * 1024 * 1024, // 25MB limit
   SUPPORTED_FORMATS: ['mp3'],
   SIGNED_URL_EXPIRY: 24 // hours
@@ -188,6 +189,41 @@ async function transcribeAudio(filePath) {
   }
 }
 
+async function anonymizeText(text) {
+  if(!text || typeof text !== 'string') {
+    throw new Error('Invalid text: must be a non-empty string');
+  }
+
+  try {
+    const payload = {
+      model: CONFIG.MISTRAL_MODEL_TEXT,
+      messages: [
+        { role: 'system', content: 'You are a text anonymizer. Replace all personal information (PII) and sensitive data (e.g., credit card numbers, social security numbers, etc.) with [SENSITIVE]. Do not modify any other text.' },
+        { role: 'user', content: text }
+      ],
+    };
+
+    const { data } = await axios.post(`${CONFIG.MISTRAL_ENDPOINT}/chat/completions`, payload, {
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Authorization': `Bearer ${CONFIG.MISTRAL_API_KEY}`,
+      },
+    });
+
+    if (!data.choices?.[0]?.message?.content) {
+      throw new Error('Empty response from Mistral');
+    }
+
+    let results = data.choices[0].message.content;
+
+    return results;
+  } catch (error) {
+    throw new Error(`Text anonymization failed: ${error.message}`);
+  }
+}
+
+
 
 /**
  * Complete audio analysis flow with Mistral
@@ -212,5 +248,6 @@ async function analyzeDirectFromAudio(filePath, transcription, doChecklist, dont
 
 module.exports = {
   transcribeAudio,
+  anonymizeText,
   analyzeDirectFromAudio
 };

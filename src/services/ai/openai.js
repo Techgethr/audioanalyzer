@@ -59,6 +59,31 @@ async function transcribeAudio(filePath) {
   }
 }
 
+async function anonymizeText(text) {
+  if(!text || typeof text !== 'string') {
+    throw new Error('Invalid text: must be a non-empty string');
+  }
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: CONFIG.TEXT_MODEL,
+      messages: [
+        { role: 'system', content: 'You are a text anonymizer. Replace all personal information (PII) and sensitive data (e.g., credit card numbers, social security numbers, etc.) with [SENSITIVE]. Do not modify any other text.' },
+        { role: 'user', content: text }
+      ],
+      temperature: 0.2
+    });
+
+    if (!response.choices?.[0]?.message?.content) {
+      throw new Error('Received empty response from GPT');
+    }
+
+    return response.choices[0].message.content.trim();
+  } catch (error) {
+    throw new Error(`Text anonymization failed: ${error.message}`);
+  }
+}
+
 /**
  * Analyzes audio content using GPT based on provided checklist
  * @param {string} transcription - Transcribed text
@@ -129,5 +154,6 @@ async function analyzeWithGPT(transcription, doChecklist, dontChecklist, languag
 
 module.exports = {
   transcribeAudio,
+  anonymizeText,
   analyzeWithGPT // Updated function name for consistency
 };

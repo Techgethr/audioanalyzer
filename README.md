@@ -33,7 +33,7 @@ App for analyzing conversation audio for various campaigns (such as support, sal
 - Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary).
 - Process using different AI models or services (for example: use OpenAI Whisper for transcription and Mistral for analysis).
 - Inserts the results in a structured manner into a database for further analysis.
-- **Data protection**: Does not include personal information (PII) or sensitive data (e.g., credit card numbers, social security numbers, etc.) in the analysis and hides this information in the JSON response (use [SENSITIVE] to hide it).
+- **Data protection**: Does not include personal information (PII) or sensitive data (e.g., credit card numbers, social security numbers, etc.) in the analysis and hides this information in the JSON response (use [SENSITIVE] to hide it). For this, it uses AI after the transcription to send the anonymized text for the analysis.
 - **Language support**: Supports multiple languages (Spanish, English, French, Portuguese, German, Italian, Dutch, Hindi).
 - **Failure recovery**: Moves problematic audios to a `failed` folder for manual review, without stopping the process.
 - Modular and scalable structure.
@@ -51,6 +51,7 @@ audioanalyzer/
 │   └── services
 │       └── ai
 │       └── analyzer
+│       └── anonymizer
 │       └── database
 │       └── transcriber
 ├── package.json
@@ -214,10 +215,11 @@ This project can now run as a Lambda function, automatically processing audio fi
 
 ## To Do
 - [x] Decoupling of AI services between transcriber and analyzer.
-- [ ] Automatic anonymization of sensitive data (PII, credit cards, etc.).
+- [x] Automatic anonymization of sensitive data (PII, credit cards, etc.) using AI and LLM.
 - [ ] Integration with more database engines.
-- [ ] Integration with more AI engines.
+- [ ] Integration with more AI engines and Huggingface SDK.
 - [ ] Integration with Cloud providers (Azure, AWS, Google Cloud, and others).
+- [ ] Calculate costs incurred for each audio and at campaign level.
 - [ ] Web app to manage campaigns, and results.
 - [ ] Dashboard with interactive visualizations of the analyses.
 - [ ] Batch processing
@@ -256,7 +258,7 @@ App para analizar audios de conversaciones para distintas campañas (como soport
 - Analiza audios de detalle y justificación (seguimiento de un script predefinido de conversación, análisis emocional y del tono, calidad del audio, y resumen de cumplimiento)
 - Procesa usando diferentes modelos o servicios de AI (por ejemplo OpenAI para transcripción y Mistral para análisis).
 - Inserta los resultados de manera estructura en una base de datos para su posterior análisis. 
-- **Protección de datos**: No incluye información personal (PII) ni datos sensibles (como números de tarjetas de crédito, números de seguridad social, etc.) en el análisis y oculta esta información en la respuesta JSON (usa [SENSITIVE] para ocultarla).
+- **Protección de datos**: No incluye información personal (PII) ni datos sensibles (como números de tarjetas de crédito, números de seguridad social, etc.) en el análisis y oculta esta información en la respuesta JSON (usa [SENSITIVE] para ocultarla). Para esto, usa AI después de la transcripción para enviar el texto anonimizado para el análisis.
 - **Soporte de idiomas**: Soporta múltiples idiomas (Espanol, Inglés, Francés, Portugués, Aleman, Italiano, Holandés, Hindi).
 - **Recuperación ante fallos**: Mueve los audios problemáticos a una carpeta `failed` para revisión manual, sin detener el proceso.
 - Estructura modular y escalable.
@@ -274,6 +276,7 @@ audioanalyzer/
 │   └── services
 │       └── ai
 │       └── analyzer
+│       └── anonymizer
 │       └── database
 │       └── transcriber
 ├── package.json
@@ -436,10 +439,11 @@ Ahora este proyecto puede ejecutarse como función Lambda, procesando automátic
 
 ## Por hacer
 - [x] Desacoplamiento de servicios AI entre transcriber y analyzer.
-- [ ] Anonimización automática de datos sensibles (PII, tarjetas de crédito, etc.).
+- [x] Anonimización automática de datos sensibles (PII, tarjetas de crédito, etc.) usando AI y LLM.
 - [ ] Integración con más motores de bases de datos.
-- [ ] Integración con más motores de IA.
+- [ ] Integración con más motores de IA y Huggingface SDK.
 - [ ] Integración con proveedores de nube (Azure, AWS, Google Cloud, y otros).
+- [ ] Medición de costos incurridos por cada audio y a nivel campaña.
 - [ ] Aplicación web para gestionar campañas y resultados.
 - [ ] Dashboard con visualizaciones interactivas de los análisis.
 - [ ] Procesamiento por lotes
