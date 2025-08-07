@@ -1,7 +1,7 @@
 require('dotenv').config();
 const fs = require('fs').promises;
 const { OpenAI } = require('openai');
-const { getInstructions } = require('../../promptManager');
+const { getInstructions, ANONYMIZER_PROMPT } = require('../../promptManager');
 
 const openai = new OpenAI({ 
   apiKey: process.env.OPENAI_API_KEY, 
@@ -68,7 +68,7 @@ async function anonymizeText(text) {
     const response = await openai.chat.completions.create({
       model: CONFIG.TEXT_MODEL,
       messages: [
-        { role: 'system', content: 'You are a text anonymizer. Replace all personal information (PII) and sensitive data (e.g., credit card numbers, social security numbers, etc.) with [SENSITIVE]. Do not modify any other text.' },
+        { role: 'system', content: ANONYMIZER_PROMPT },
         { role: 'user', content: text }
       ],
       temperature: 0.2

@@ -1,7 +1,7 @@
 const axios = require('axios');
 const fs = require('fs').promises;
 const FormData = require('form-data');
-const { getInstructions } = require('../../promptManager');
+const { getInstructions, ANONYMIZER_PROMPT } = require('../../promptManager');
 require('dotenv').config();
 
 const CONFIG = {
@@ -198,7 +198,7 @@ async function anonymizeText(text) {
     const payload = {
       model: CONFIG.MISTRAL_MODEL_TEXT,
       messages: [
-        { role: 'system', content: 'You are a text anonymizer. Replace all personal information (PII) and sensitive data (e.g., credit card numbers, social security numbers, etc.) with [SENSITIVE]. Do not modify any other text.' },
+        { role: 'system', content: ANONYMIZER_PROMPT },
         { role: 'user', content: text }
       ],
     };

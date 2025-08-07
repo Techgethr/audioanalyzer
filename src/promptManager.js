@@ -1,4 +1,5 @@
 
+const ANONYMIZER_PROMPT = 'You are a text anonymizer. Replace all personal information (PII) and sensitive data (e.g., credit card numbers, social security numbers, etc.) with [SENSITIVE]. Do not modify any other text.';
 
 function getSystemMessage() {
     var systemMessage = `You are an assistant who evaluates different aspects of quality in a conversation. Your tasks are:
@@ -121,5 +122,6 @@ function getInstructions(language, doChecklist, dontChecklist, transcription) {
 }
 
 module.exports = {
-  getInstructions
+  getInstructions,
+  ANONYMIZER_PROMPT
 };
