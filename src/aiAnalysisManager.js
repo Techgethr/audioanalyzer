@@ -7,7 +7,10 @@ async function analyzeAudio(filePath, doChecklist, dontChecklist, language) {
 
     const transcription = await transcriber.getTranscriber().transcribe(filePath);
 
-    const anonymizedText = await anonymizer.getAnonymizer().anonymizeText(transcription);
+    let anonymizedText = transcription;
+    if (process.env.ANONYMIZE_TRANSCRIPTION === 'true') {
+      anonymizedText = await anonymizer.getAnonymizer().anonymizeText(transcription);
+    }
 
     const analysisResult = await analyzer.getAnalyzer().analyze(filePath, anonymizedText, { doChecklist, dontChecklist, language });
 
