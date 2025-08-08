@@ -5,6 +5,8 @@ function getTranscriber() {
         return new (require('./mistral'))();
       case 'openai':
         return new (require('./openai'))();
+      case 'huggingface':
+        return new (require('./huggingface'))();
       default:
         throw new Error(`Unknown transcriber: ${name}`);
     }

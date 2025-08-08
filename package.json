@@ -1,5 +1,5 @@
 {
-  "name": "audioanalyzer",
+  "name": "sonaly",
   "version": "1.0.0",
   "description": "App to analyze audios and verify script compliance (QA) using AI.",
   "main": "index.js",
@@ -7,6 +7,7 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "@huggingface/inference": "^4.6.1",
     "@supabase/supabase-js": "^2.53.0",
     "aws-sdk": "^2.1481.0",
     "axios": "^1.10.0",

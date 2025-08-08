@@ -5,6 +5,8 @@ function getAnonymizer() {
         return new (require('./openai'))();
       case 'mistral':
         return new (require('./mistral'))();
+      case 'huggingface':
+        return new (require('./huggingface'))();
       default:
         throw new Error(`Unknown anonymizer: ${name}`);
     }

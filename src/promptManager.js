@@ -1,5 +1,10 @@
 
-const ANONYMIZER_PROMPT = 'You are a text anonymizer. Replace all personal information (PII) and sensitive data (e.g., credit card numbers, social security numbers, etc.) with [SENSITIVE]. Do not modify any other text.';
+const ANONYMIZER_PROMPT = `You are a text anonymizer. 
+Replace all personal information (PII) and sensitive data (e.g., credit card numbers, social security numbers, etc.) with [SENSITIVE]. 
+Only anonymize the sensitive value, not the type of information (for example, if the user says: My ID is 123, the value 123 should be anonymized, but not the ID, in order to know what type of information it is).
+Do not modify any other text. 
+In your response, omit everything that corresponds to your thought analysis (think or no_think). 
+Only submit the anonymized text.`;
 
 function getSystemMessage() {
     var systemMessage = `You are an assistant who evaluates different aspects of quality in a conversation. Your tasks are:
@@ -72,6 +77,9 @@ function getPrompt(language, doChecklist, dontChecklist, transcription) {
             If something is not present in the ${includeTranscription ?"transcription":"audio"}, then don't say it is. 
             If you analyze a transcript, the audio quality analysis does not apply.
             If you detect any personal information (PII) or any sensitive information (e.g., credit card numbers, social security numbers, etc.), do not include it in the analysis and hide it in the JSON response (use [SENSITIVE] to hide it).
+            In your response, omit everything that corresponds to your thought analysis (think or no_think). 
+            ONLY SUBMIT the JSON response. If you get the rawResponse property, omit it and do not include it in the JSON response.
+            KEEP the JSON format specified in your response, without adding any additional attributes or properties, as your response will then be parsed into an object.
 
             Submit your answers and justifications in ${languageSelection}.
             
@@ -105,7 +113,8 @@ function getPrompt(language, doChecklist, dontChecklist, transcription) {
                 },
                 "strengths": [string],       // List of communication strengths demonstrated (if existing)
                 "improvementAreas": [string] // List of areas where communication could be improved (if existing)
-            }`;
+            }
+            `;
 
     return prompt;
 }

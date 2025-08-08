@@ -4,6 +4,7 @@
 - [Demo](#demo)
 - [Description](#description)
 - [Features](#features)
+- [Available models](#available-models)
 - [Project Structure](#project-structure)
 - [Setup](#setup)
 - [Database](#database)
@@ -36,6 +37,16 @@ App for analyzing conversation audio for various campaigns (such as support, sal
 - **Language support**: Supports multiple languages (Spanish, English, French, Portuguese, German, Italian, Dutch, Hindi).
 - **Failure recovery**: Moves problematic audios to a `failed` folder for manual review, without stopping the process.
 - Modular and scalable structure.
+
+## Available models
+
+- **OpenAI** and any OpenAI SDK compatible model: For transcription and analysis.
+- **Whisper**: For transcription.
+- **Any OpenAI SDK compatible model**: For transcription and analysis.
+- **Any Whisper compatible model**: For transcription using OpenAI SDK.
+- **Mistral**:  For transcription and analysis.
+- **Any Mistral API compatible model**: For transcription and analysis.
+- **Huggingface**: For transcription and analysis, with any available provider.
 
 ## Project Structure
 
@@ -85,8 +96,8 @@ audioanalyzer/
 2. **Set up your keys:**
    - Create a `.env` file with the following content:
      ```
-     AI_TRANSCRIBER_SERVICE=openai or mistral
-     AI_ANALYZER_SERVICE=openai or mistral
+     AI_TRANSCRIBER_SERVICE=openai or mistral or huggingface
+     AI_ANALYZER_SERVICE=openai or mistral or huggingface
 
      ANONYMIZE_TRANSCRIPTION=true or false
 
@@ -106,6 +117,14 @@ audioanalyzer/
      # The text model is used for anonymizing the transcription
      MISTRAL_TEXT_MODEL=mistral-model
      MISTRAL_ENDPOINT=https://api.mistral.ai/v1
+
+     # If Huggingface is used
+     # Huggingface configuration
+     HUGGINGFACE_API_KEY=
+     HUGGINGFACE_PROVIDER_AUDIO=
+     HUGGINGFACE_PROVIDER_TEXT=
+     HUGGINGFACE_AUDIO_MODEL=
+     HUGGINGFACE_TEXT_MODEL=
 
      # If you want to use a database (otherwise, if empty, results are only saved in the text file)
      DB_ENGINE=supabase
@@ -219,8 +238,8 @@ This project can now run as a Lambda function, automatically processing audio fi
 ## To Do
 - [x] Decoupling of AI services between transcriber and analyzer.
 - [x] Automatic anonymization of sensitive data (PII, credit cards, etc.) using AI and LLM.
+- [x] Integration with more AI engines and Huggingface SDK.
 - [ ] Integration with more database engines.
-- [ ] Integration with more AI engines and Huggingface SDK.
 - [ ] Integration with Cloud providers (Azure, AWS, Google Cloud, and others).
 - [ ] Calculate costs incurred for each audio and at campaign level.
 - [ ] Web app to manage campaigns, and results.
