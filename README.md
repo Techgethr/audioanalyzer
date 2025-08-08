@@ -31,7 +31,7 @@ App for analyzing conversation audio for various campaigns (such as support, sal
 - **Two execution modes**: single run (processes and exits) or continuous (watches for new audios).
 - Transcribe audio using different models (OpenAI Whisper, Mistral Voxtral or any model compatible with OpenAI SDK)
 - Analyze audio for detail and justification (following a predefined conversation script, emotional and tone analysis, audio quality, and compliance summary).
-- Process using different AI models or services (for example: use OpenAI Whisper for transcription and Mistral for analysis).
+- Process using different AI models or services (for example: use OpenAI Whisper for transcription and Mistral for anonymizer and analysis).
 - Inserts the results in a structured manner into a database for further analysis.
 - **Data protection**: Does not include personal information (PII) or sensitive data (e.g., credit card numbers, social security numbers, etc.) in the analysis and hides this information in the JSON response (use [SENSITIVE] to hide it). For this, it uses AI after the transcription to send the anonymized text for the analysis.
 - **Language support**: Supports multiple languages (Spanish, English, French, Portuguese, German, Italian, Dutch, Hindi).
@@ -98,6 +98,7 @@ audioanalyzer/
      ```
      AI_TRANSCRIBER_SERVICE=openai or mistral or huggingface
      AI_ANALYZER_SERVICE=openai or mistral or huggingface
+     AI_ANONYMIZER_SERVICE=openai or mistral or huggingface
 
      ANONYMIZE_TRANSCRIPTION=true or false
 

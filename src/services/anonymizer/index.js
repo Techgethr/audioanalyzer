@@ -1,5 +1,5 @@
 function getAnonymizer() {
-    const name = process.env.AI_ANALYZER_SERVICE;
+    const name = process.env.AI_ANONYMIZER_SERVICE;
     switch (name) {
       case 'openai':
         return new (require('./openai'))();
