@@ -34,6 +34,7 @@ App for analyzing conversation audio for various campaigns (such as support, sal
 - Process using different AI models or services (for example: use OpenAI Whisper for transcription and Mistral for anonymizer and analysis).
 - Inserts the results in a structured manner into a database for further analysis.
 - **Data protection**: Does not include personal information (PII) or sensitive data (e.g., credit card numbers, social security numbers, etc.) in the analysis and hides this information in the JSON response (use [SENSITIVE] to hide it). For this, it uses AI after the transcription to send the anonymized text for the analysis.
+- **Parallel processing**: Processes multiple audios and campaigns in parallel.
 - **Language support**: Supports multiple languages (Spanish, English, French, Portuguese, German, Italian, Dutch, Hindi).
 - **Failure recovery**: Moves problematic audios to a `failed` folder for manual review, without stopping the process.
 - Modular and scalable structure.
@@ -101,6 +102,12 @@ audioanalyzer/
      AI_ANONYMIZER_SERVICE=openai or mistral or huggingface
 
      ANONYMIZE_TRANSCRIPTION=true or false
+
+     # Maximum number of campaigns to process in parallel
+     CAMPAIGN_CONCURRENCY_LIMIT=
+
+     # Maximum number of audios to be processed in parallel per campaign
+     AUDIO_CONCURRENCY_LIMIT=
 
      # If OpenAI is used
      OPENAI_API_KEY=tu_api_key_aqui
@@ -240,12 +247,12 @@ This project can now run as a Lambda function, automatically processing audio fi
 - [x] Decoupling of AI services between transcriber and analyzer.
 - [x] Automatic anonymization of sensitive data (PII, credit cards, etc.) using AI and LLM.
 - [x] Integration with more AI engines and Huggingface SDK.
+- [x] Batch and parallel processing for audios and campaigns. 
 - [ ] Integration with more database engines.
 - [ ] Integration with Cloud providers (Azure, AWS, Google Cloud, and others).
 - [ ] Calculate costs incurred for each audio and at campaign level.
 - [ ] Web app to manage campaigns, and results.
 - [ ] Dashboard with interactive visualizations of the analyses.
-- [ ] Batch processing
 - [ ] REST API so that other systems can use the analysis.
 - [ ] Administration panel for user management and billing.
 - [ ] Product usage analytics.

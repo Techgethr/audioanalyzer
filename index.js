@@ -1,12 +1,16 @@
 require('dotenv').config();
 const path = require('path');
 const chokidar = require('chokidar');
+const { processInBatches } = require('./src/utils/concurrency');
 const { getCampaigns, getChecklist, getAudios, getAudioPath } = require('./src/campaignManager');
 const { analyzeAudio } = require('./src/aiAnalysisManager');
 const { saveResult, moveAudioToProcessed, handleFailedAudio } = require('./src/resultWriter');
 const fs = require('fs');
 const AWS = require('aws-sdk');
 const s3 = new AWS.S3();
+
+const AUDIO_CONCURRENCY_LIMIT = parseInt(process.env.AUDIO_CONCURRENCY_LIMIT) || 5;
+const CAMPAIGN_CONCURRENCY_LIMIT = parseInt(process.env.CAMPAIGN_CONCURRENCY_LIMIT) || 2;
 
 
 async function processAudioFile(campaignName, file, doChecklist, dontChecklist, language) {
@@ -17,10 +21,49 @@ async function processAudioFile(campaignName, file, doChecklist, dontChecklist, 
     await saveResult(campaignName, file, gptResult.transcription, gptResult.results);
     moveAudioToProcessed(campaignName, file, filePath);
     console.log(`   SUCCESS: ${file} processed successfully.`);
+    return { success: true, file };
     
   } catch (err) {
     console.error(`   ERROR processing ${file}: ${err.message}`);
     handleFailedAudio(campaignName, file, filePath, err);
+    return { success: false, file, error: err.message };
+  }
+}
+
+async function processCampaign(campaignName) {
+  console.log(`\n--- Starting campaign: ${campaignName} ---`);
+  
+  let doChecklist, dontChecklist, language;
+  try {
+    const fullCheckList = await getChecklist(campaignName);
+    language = fullCheckList.language;
+    doChecklist = fullCheckList.doChecklist;
+    dontChecklist = fullCheckList.dontChecklist;
+    
+    const audios = getAudios(campaignName);
+    if (audios.length === 0) {
+      console.log(`No audios found for campaign ${campaignName}.`);
+      return { success: true, campaign: campaignName, processed: 0 };
+    }
+
+    console.log(`Processing ${audios.length} audios in campaign ${campaignName}.`);
+    
+    // Process audio in parallel
+    const results = await processInBatches(
+      audios,
+      AUDIO_CONCURRENCY_LIMIT,
+      async (file) => {
+        return processAudioFile(campaignName, file, doChecklist, dontChecklist, language);
+      }
+    );
+    
+    const successCount = results.filter(r => r && r.success).length;
+    console.log(`--- Completed campaign ${campaignName}: ${successCount}/${audios.length} audios processed successfully ---`);
+    return { success: true, campaign: campaignName, processed: audios.length, successCount };
+    
+  } catch (err) {
+    console.error(`Error processing campaign ${campaignName}:`, err.message);
+    return { success: false, campaign: campaignName, error: err.message };
   }
 }
 
@@ -32,33 +75,28 @@ async function runOnce(campaignArg) {
     return;
   }
 
-  for (const campaignName of campaignsToProcess) {
-    console.log(`\n--- Starting campaign: ${campaignName} ---`);
-    
-    let doChecklist;
-    let dontChecklist;
-    let language;
-    try {
-      const fullCheckList = await getChecklist(campaignName);
-      language = fullCheckList.language;
-      doChecklist = fullCheckList.doChecklist;
-      dontChecklist = fullCheckList.dontChecklist;
-    } catch (err) {
-      console.error(`Error starting campaign ${campaignName}: ${err.message}`);
-      continue;
-    }
-    
-    const audios = getAudios(campaignName);
-    if (audios.length === 0) {
-      console.log(`No audios found for campaign ${campaignName}.`);
-      continue;
-    }
+  console.log(`\nStarting processing of ${campaignsToProcess.length} campaigns with concurrency of ${CAMPAIGN_CONCURRENCY_LIMIT}...`);
 
-    console.log(`Processing ${audios.length} audios.`);
-    for (const file of audios) {
-      await processAudioFile(campaignName, file, doChecklist, dontChecklist, language);
+  // Process campaign in parallel
+  const results = await processInBatches(
+    campaignsToProcess,
+    CAMPAIGN_CONCURRENCY_LIMIT,
+    async (campaignName) => {
+      return processCampaign(campaignName);
     }
-  }
+  );
+
+  // Show summary
+  const successCampaigns = results.filter(r => r && r.success);
+  const totalProcessed = successCampaigns.reduce((sum, r) => sum + (r.processed || 0), 0);
+  const totalSuccess = successCampaigns.reduce((sum, r) => sum + (r.successCount || 0), 0);
+  
+  console.log("\n--- Processing Summary ---");
+  console.log(`Campaigns processed: ${successCampaigns.length}/${campaignsToProcess.length} successful`);
+  console.log(`Total audios processed: ${totalProcessed}`);
+  console.log(`Successfully processed audios: ${totalSuccess}`);
+  console.log("--------------------------\n");
+
   console.log("\n--- All campaigns have been processed ---");
 }
 
@@ -115,9 +153,10 @@ function runWatcher(campaignArg) {
         console.log(`\n-> New audio detected: ${file} in campaign ${campaignName}`);
         try {
             const fullCheckList = await getChecklist(campaignName);
-            const checklist = fullCheckList.checklist;
+            const doChecklist = fullCheckList.doChecklist;
+            const dontChecklist = fullCheckList.dontChecklist;
             const language = fullCheckList.language;
-            await processAudioFile(campaignName, file, checklist,language);
+            await processAudioFile(campaignName, file, doChecklist,dontChecklist,language);
         } catch(err) {
             console.error(`Error processing new audio in watcher mode: ${err.message}`);
             handleFailedAudio(campaignName, file, absolutePath, err);
